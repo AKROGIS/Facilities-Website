@@ -31,7 +31,6 @@ td.att_name { font-weight: bold;
  * Header Area
  */
 #header {
-    height:35px;
     width: 100%;
     background:#000000;
     color:#fff;
@@ -43,13 +42,13 @@ td.att_name { font-weight: bold;
 }
 
 #headerText{
-    padding-top:5px;
-    padding-left:20px;
+    padding-top:2px;
+    padding-left:15px;
     float:left;
 }
 
 #title {
-    font-size:1.7em;
+    font-size:1.6em;
     font-weight:bold;
     text-align:left;
     white-space: nowrap;
@@ -61,7 +60,7 @@ td.att_name { font-weight: bold;
 }
 
 #subtitle {
-    font-size:.9em;
+    font-size:.8em;
     overflow: hidden;
     font-weight:normal;
     color: #C5D5D5;
@@ -70,20 +69,18 @@ td.att_name { font-weight: bold;
 
 #logoArea{
     float:right;
-    padding-top:5px;
-    padding-right:20px;
+    padding-top: 5px;
+    padding-right:15px;
 }
 
 #organizationText {
     float:left;
-    padding-right: 10px;
-    padding-top:10px;
     text-align:right;
-    font-size:.9em;
+    font-size:.75em;
 }
 
 #logo{
-    height:25px;
+    height:35px;
     border:none;
     outline:none;
     float:right;
@@ -216,7 +213,7 @@ ul.tilelist .blurb {
  */
 #map {
     position:absolute;
-    top:35px;
+    top:45px;
     border:none;
     padding:0;
     height:100%;
