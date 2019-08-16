@@ -6,72 +6,113 @@
     <title>NPS Facilities (Alaska)</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" type="text/css" href="leaflet-search/leaflet-search.src.css">
-    <script type="text/javascript" src="lib/jquery-1.7.2.min.js"></script>
-    <script type="text/javascript" src="app/main.js"></script>
-    <script type="text/javascript" src="map.js"></script>
-    <script type="text/javascript" src="config.js"></script>
     <script type="text/javascript" src="leaflet-search/leaflet-search.src.js"></script>
   </head>
 
   <body>
 
-    <!-- Header Section-->
     <div id="header">
       <div id="headerText">
-        <h1 id="title">title</h1>
-        <h2 id="subtitle">subtitle</h2>
+        <h1 id="title">Alaska Facilities</h1>
+        <h2 id="subtitle">A tool for locating the maintained infrastructure in Alaska's National Parks and Preserves</h2>
       </div>
       <div id="logoArea">
         <div id="organizationText">
-          Alaska Region<br/><br/>
+          Alaska Region GIS<br/>
           National Park Service<br/>
-          U.S. Department of the Interior <br/>
+          U.S. Department of the Interior<br/>
         </div>
         <div id="logo">
-          <img src="images/ArrowheadNoBackground.png" height="25" alt="National Park Service Arrowhead">
+          <img src="images/ArrowheadNoBackground.png" height="100%" alt="National Park Service Arrowhead">
         </div>
       </div>
     </div>
 
     <div id="map"></div>
-    <!--
-    <div id="mobileTitlePage"></div>
 
-    <div id="mainWindow">
-
-
-      <div id="paneLeft">
-        <ul id="myList" class="tilelist"></ul>
-        <div class="noFeature">
-          <span class="noFeatureText">
-             No items are in your current map extent.
-            Zoom out to see places.
-          </span>
-          <span class="tooManyFeaturesText">
-             There are too many items visible to list.
-            Zoom in to a specific area.
-          </span>
-        </div>
-      </div>
-
-      <div id="map"></div>
-    </div>
--->
     <script>
         (function() {
             var s = document.createElement('script');
             s.src = 'npmap/npmap-bootstrap.js';
             document.body.appendChild(s);
         })();
-      (function() {
-        var s = document.createElement('script');
-        s.src = 'app/run.js';
-        document.body.appendChild(s);
-      })();
-      photos = {};
-      $.getJSON( "/fmss/photos.json", function( data ) {
-        photos = data;
-      });
+
+
+
+
+    function setupSearch() {
+        var map = NPMap.config.L;
+        var controlSearch = new L.Control.Search({
+            layer: NPMap.config.overlays[0].L,
+            propertyName: "ID",
+            zoom: 18,
+            text:"FMSS ID",
+            initial: false});
+        map.addControl( controlSearch );
+    }
+
+    function npmapReady() {
+        initSearch();   //in modified version of leaflet-search.js
+        setupSearch();  //in main.js
+    }
+
+    var NPMap = {
+        center: {
+            lat: 62,
+            lng: -152
+        },
+        div: 'map',
+        overlays: [
+          {
+            cluster: true,
+            popup: {
+                title: '{{ID}}',
+                description: '<p>{{Name}}</p>' +
+                '<table>' +
+                    '<tr><td class="att_name">Description</td><td>{{Desc}}</td></tr>' +
+                    '<tr><td class="att_name">Value</td><td>{{CRV}}</td></tr>' +
+                    '<tr><td class="att_name">Def. Maint</td><td>{{DM}}</td></tr>' +
+                    '<tr><td class="att_name">Age</td><td>{{Age}}</td></tr>' +
+                    '<tr><td class="att_name">Status</td><td>{{Status}}</td></tr>' +
+                    '</table>',
+                media:[{
+                    type:"fmss",
+                    id:"Photo_Id"
+                }]
+            },
+            styles: {
+              point: {
+                  'marker-symbol': 'square'
+              }
+            },
+            tooltip: '{{ID}}',
+            type: 'csv',
+            url: 'data/facilities.csv'
+          }
+          ,{
+            type:'arcgisserver',
+            opacity: 1.0,
+            tiled: false,
+            minZoom:15,
+            url: 'https://akrgis.nps.gov/arcgis/rest/services/AKR_Apps/FMSS_web_service/MapServer'
+          }
+        ,{
+            type: 'arcgisserver',
+            opacity: 0.8,
+            tiled: true,
+            url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
+            minZoom:15,
+          }
+        ],
+        zoom: 5,
+        maxZoom: 20
+    };
+
+      var photos;
+      fetch("/fmss/photos.json")
+        .then(response => response.json())
+        .then(data => photos = data);
+
     </script>
   </body>
 </html>
