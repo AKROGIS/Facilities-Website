@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>NPS Facilities (Alaska)</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="leaflet-search/leaflet-search.src.css">
+    <script type="text/javascript" src="lib/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="app/main.js"></script>
+    <script type="text/javascript" src="map.js"></script>
+    <script type="text/javascript" src="config.js"></script>
+    <script type="text/javascript" src="leaflet-search/leaflet-search.src.js"></script>
+  </head>
+
+  <body>
+
+    <!-- Header Section-->
+    <div id="header">
+      <div id="headerText">
+        <h1 id="title">title</h1>
+        <h2 id="subtitle">subtitle</h2>
+      </div>
+      <div id="logoArea">
+        <div id="organizationText">
+          Alaska Region<br/><br/>
+          National Park Service<br/>
+          U.S. Department of the Interior <br/>
+        </div>
+        <div id="logo">
+          <img src="images/ArrowheadNoBackground.png" height="25" alt="National Park Service Arrowhead">
+        </div>
+      </div>
+    </div>
+
+    <div id="map"></div>
+    <!--
+    <div id="mobileTitlePage"></div>
+
+    <div id="mainWindow">
+
+
+      <div id="paneLeft">
+        <ul id="myList" class="tilelist"></ul>
+        <div class="noFeature">
+          <span class="noFeatureText">
+             No items are in your current map extent.
+            Zoom out to see places.
+          </span>
+          <span class="tooManyFeaturesText">
+             There are too many items visible to list.
+            Zoom in to a specific area.
+          </span>
+        </div>
+      </div>
+
+      <div id="map"></div>
+    </div>
+-->
+    <script>
+        (function() {
+            var s = document.createElement('script');
+            s.src = 'npmap/npmap-bootstrap.js';
+            document.body.appendChild(s);
+        })();
+      (function() {
+        var s = document.createElement('script');
+        s.src = 'app/run.js';
+        document.body.appendChild(s);
+      })();
+      photos = {};
+      $.getJSON( "/fmss/photos.json", function( data ) {
+        photos = data;
+      });
+    </script>
+  </body>
+</html>
