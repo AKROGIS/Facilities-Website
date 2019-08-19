@@ -1,44 +1,112 @@
-  --Latitude,Longitude,FMSS_Id,Desc,Cost,Size,Status,Year,Occupant,Name,Park_Id,Photo_Id
-  
-  SELECT
-  g.Shape.STY as Latitude, g.Shape.STX as Longitude, g.FACLOCID as ID, g.MAPLABEL as [Name],
-  f.CRV as CRV, f.DM as DM, YEAR(GetDate()) - Try_Convert(int,f.YearBlt) as Age, f.Description as [Desc],
-  f.Parent, f.Status as Status, 'warehouse' as [marker-symbol],
-  COALESCE(FACLOCID, COALESCE(FEATUREID, COALESCE(FACASSETID, GEOMETRYID))) AS Photo_Id
-  FROM [akr_facility2].[gis].[AKR_BLDG_CENTER_PT] as g
-  JOIN [akr_facility2].[dbo].[FMSSExport] as f
-  on g.FACLOCID = f.Location
-  where g.FACLOCID is not null and f.[Type] = 'OPERATING'
+--Select  [marker-symbol], ID, count(*) from (
+    SELECT
+    g.FACLOCID as ID, g.MAPLABEL as [Name], g.Shape.STY as Latitude, g.Shape.STX as Longitude,
+    f.CRV as CRV, f.DM as DM, YEAR(GetDate()) - Try_Convert(int,f.YearBlt) as Age, f.Description as [Desc],
+    f.Parent, f.Status as Status, 'warehouse' as [marker-symbol],
+    COALESCE(FACLOCID, COALESCE(FEATUREID, COALESCE(FACASSETID, GEOMETRYID))) AS Photo_Id
+    FROM [akr_facility2].[gis].[AKR_BLDG_CENTER_PT] as g
+    JOIN [akr_facility2].[dbo].[FMSSExport] as f
+    on g.FACLOCID = f.Location
+    where g.FACLOCID is not null and f.[Type] = 'OPERATING'
   UNION
-  SELECT
-  g.Shape.STCentroid().STY as Latitude, g.Shape.STCentroid().STX as Longitude, g.FACLOCID as ID, g.MAPLABEL as [Name],
-  f.CRV as CRV, f.DM as DM, YEAR(GetDate()) - Try_Convert(int,f.YearBlt) as Age, f.Description as [Desc],
-  f.Parent, f.Status as Status, 'parking' as [marker-symbol],
-  COALESCE(FACLOCID, COALESCE(FEATUREID, COALESCE(FACASSETID, GEOMETRYID))) AS Photo_Id 
-  FROM [akr_facility2].[gis].[PARKLOTS_PY] as g
-  JOIN [akr_facility2].[dbo].[FMSSExport] as f
-  on g.FACLOCID = f.Location
-  where g.FACLOCID is not null and f.[Type] = 'OPERATING'
+    SELECT
+    g.FACLOCID as ID, g.MAPLABEL as [Name], g.Shape.STCentroid().STY as Latitude, g.Shape.STCentroid().STX as Longitude,
+    f.CRV as CRV, f.DM as DM, YEAR(GetDate()) - Try_Convert(int,f.YearBlt) as Age, f.Description as [Desc],
+    f.Parent, f.Status as Status, 'parking' as [marker-symbol],
+    COALESCE(FACLOCID, COALESCE(FEATUREID, COALESCE(FACASSETID, GEOMETRYID))) AS Photo_Id 
+    FROM [akr_facility2].[gis].[PARKLOTS_PY] as g
+    JOIN [akr_facility2].[dbo].[FMSSExport] as f
+    on g.FACLOCID = f.Location
+    where g.FACLOCID is not null and f.[Type] = 'OPERATING'
   UNION
-  SELECT
-  g.Shape.STStartPoint().STY as Latitude, g.Shape.STStartPoint().STX as Longitude, g.FACLOCID as ID, g.MAPLABEL as [Name],
-  f.CRV as CRV, f.DM as DM, YEAR(GetDate()) - Try_Convert(int,f.YearBlt) as Age, f.Description as [Desc],
-  f.Parent, f.Status as Status, 'star' as [marker-symbol],
-  COALESCE(FACLOCID, COALESCE(FEATUREID, COALESCE(FACASSETID, GEOMETRYID))) AS Photo_Id
-  FROM [akr_facility2].[gis].[TRAILS_LN] as g
-  JOIN [akr_facility2].[dbo].[FMSSExport] as f
-  on g.FACLOCID = f.Location
-  where g.FACLOCID is not null and f.[Type] = 'OPERATING'
+    SELECT g.ID, g.[Name], g.Latitude, g.Longitude,
+    f.CRV as CRV, f.DM as DM, YEAR(GetDate()) - Try_Convert(int,f.YearBlt) as Age, f.Description as [Desc],
+    f.Parent, f.Status as Status, 'star' as [marker-symbol],
+    g.ID AS Photo_Id
+    FROM (
+            Select ID, Latitude, Longitude, [Name] FROM (
+                SELECT
+                Shape.STStartPoint().STY as Latitude, Shape.STStartPoint().STX as Longitude, FACLOCID as ID, MAPLABEL as [Name]
+                FROM [akr_facility2].[gis].[TRAILS_LN] where faclocid is not null and ISBRIDGE = 'No'
+                UNION ALL
+                SELECT
+                Shape.STEndPoint().STY as Latitude, Shape.STEndPoint().STX as Longitude, FACLOCID as ID, MAPLABEL as [Name]
+                FROM [akr_facility2].[gis].[TRAILS_LN] where faclocid is not null and ISBRIDGE = 'No'
+            ) as t
+            group by ID, Latitude, Longitude, [Name] having count(*) = 1
+    ) as g
+    JOIN [akr_facility2].[dbo].[FMSSExport] as f
+    on g.ID = f.Location
+    where f.[Type] = 'OPERATING'
   UNION
-  SELECT
-  g.Shape.STStartPoint().STY as Latitude, g.Shape.STStartPoint().STX as Longitude, g.FACLOCID as ID, g.MAPLABEL as [Name],
-  f.CRV as CRV, f.DM as DM, YEAR(GetDate()) - Try_Convert(int,f.YearBlt) as Age, f.Description as [Desc],
-  f.Parent, f.Status as Status, 'bus' as [marker-symbol],
-  COALESCE(FACLOCID, COALESCE(FEATUREID, COALESCE(FACASSETID, GEOMETRYID))) AS Photo_Id
-  FROM [akr_facility2].[gis].[ROADS_LN] as g
-  JOIN [akr_facility2].[dbo].[FMSSExport] as f
-  on g.FACLOCID = f.Location
-  where g.FACLOCID is not null and f.[Type] = 'OPERATING'
+    SELECT g.ID, g.[Name], g.Latitude, g.Longitude,
+    f.CRV as CRV, f.DM as DM, YEAR(GetDate()) - Try_Convert(int,f.YearBlt) as Age, f.Description as [Desc],
+    f.Parent, f.Status as Status, 'bus' as [marker-symbol],
+    g.ID AS Photo_Id
+    FROM (
+            Select ID, Latitude, Longitude, [Name] FROM (
+                SELECT
+                Shape.STStartPoint().STY as Latitude, Shape.STStartPoint().STX as Longitude, FACLOCID as ID, MAPLABEL as [Name]
+                FROM [akr_facility2].[gis].[ROADS_LN] where faclocid is not null and ISBRIDGE = 'No'
+                UNION ALL
+                SELECT
+                Shape.STEndPoint().STY as Latitude, Shape.STEndPoint().STX as Longitude, FACLOCID as ID, MAPLABEL as [Name]
+                FROM [akr_facility2].[gis].[ROADS_LN] where faclocid is not null and ISBRIDGE = 'No'
+            ) as t
+            group by ID, Latitude, Longitude, [Name] having count(*) = 1
+    ) as g
+    JOIN [akr_facility2].[dbo].[FMSSExport] as f
+    on g.ID = f.Location
+    where f.[Type] = 'OPERATING'
+  UNION
+    SELECT
+    g.FACLOCID as ID, g.MAPLABEL as [Name],
+    -- Get mid point of bridge
+    CASE WHEN (g.Shape.STNumPoints() % 2) = 0
+    THEN --Even number of vertices
+       (g.Shape.STPointN(g.Shape.STNumPoints()/2).STY + g.Shape.STPointN(1 + g.Shape.STNumPoints()/2).STY)/2.0
+    ELSE -- Odd
+       g.Shape.STPointN(1 + g.Shape.STNumPoints()/2).STY
+    END  as Latitude,
+    CASE WHEN (g.Shape.STNumPoints() % 2) = 0
+    THEN --Even
+       (g.Shape.STPointN(g.Shape.STNumPoints()/2).STX + g.Shape.STPointN(1 + g.Shape.STNumPoints()/2).STX)/2.0
+    ELSE -- Odd
+       g.Shape.STPointN(1 + g.Shape.STNumPoints()/2).STX
+    END as Longitude,
+    f.CRV as CRV, f.DM as DM, YEAR(GetDate()) - Try_Convert(int,f.YearBlt) as Age, f.Description as [Desc],
+    f.Parent, f.Status as Status, 'square' as [marker-symbol],
+    COALESCE(FACLOCID, COALESCE(FEATUREID, COALESCE(FACASSETID, GEOMETRYID))) AS Photo_Id 
+    FROM [akr_facility2].[gis].[ROADS_LN] as g
+    JOIN [akr_facility2].[dbo].[FMSSExport] as f
+    on g.FACLOCID = f.Location
+    where g.FACLOCID is not null and g.ISBRIDGE = 'Yes' and f.[Type] = 'OPERATING'   
+  UNION
+    SELECT
+    g.FACLOCID as ID, g.MAPLABEL as [Name],
+    -- Get mid point of bridge
+    CASE WHEN (g.Shape.STNumPoints() % 2) = 0
+    THEN --Even number of vertices
+       (g.Shape.STPointN(g.Shape.STNumPoints()/2).STY + g.Shape.STPointN(1 + g.Shape.STNumPoints()/2).STY)/2.0
+    ELSE -- Odd
+       g.Shape.STPointN(1 + g.Shape.STNumPoints()/2).STY
+    END  as Latitude,
+    CASE WHEN (g.Shape.STNumPoints() % 2) = 0
+    THEN --Even
+       (g.Shape.STPointN(g.Shape.STNumPoints()/2).STX + g.Shape.STPointN(1 + g.Shape.STNumPoints()/2).STX)/2.0
+    ELSE -- Odd
+       g.Shape.STPointN(1 + g.Shape.STNumPoints()/2).STX
+    END as Longitude,
+    f.CRV as CRV, f.DM as DM, YEAR(GetDate()) - Try_Convert(int,f.YearBlt) as Age, f.Description as [Desc],
+    f.Parent, f.Status as Status, 'square' as [marker-symbol],
+    COALESCE(FACLOCID, COALESCE(FEATUREID, COALESCE(FACASSETID, GEOMETRYID))) AS Photo_Id 
+    FROM [akr_facility2].[gis].[TRAILS_LN] as g
+    JOIN [akr_facility2].[dbo].[FMSSExport] as f
+    on g.FACLOCID = f.Location
+    where g.FACLOCID is not null and g.ISBRIDGE = 'Yes' and f.[Type] = 'OPERATING'   
+--) as t
+--group by [marker-symbol], ID having count(*) > 1
+--order by [marker-symbol], count(*) DESC, ID
 
 /*  Original Building Query
 
