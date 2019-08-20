@@ -6,7 +6,6 @@
     <title>NPS Facilities (Alaska)</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" type="text/css" href="leaflet-search/leaflet-search.src.css">
-    <script type="text/javascript" src="leaflet-search/leaflet-search.src.js"></script>
   </head>
 
   <body>
@@ -38,14 +37,20 @@
             layer: NPMap.config.overlays[0].L,
             propertyName: "ID",
             zoom: 18,
-            text:"FMSS ID",
-            initial: false});
+            textPlaceholder:"FMSS ID",
+            initial: false,
+            hideMarkerOnCollapse: true});
         map.addControl( controlSearch );
     }
 
     function npmapReady() {
-        initSearch();   //in modified version of leaflet-search.js
-        setupSearch();  //in main.js
+      // The last thing npmap-bootstrap.js does is add a script load to the DOM for npmap.js
+      // search must be loaded after npmap.js, not just npmap-bootstrap.js, so we need to
+      // wait for npmapReady() to be called before loading this script
+      var script = document.createElement( "script" )
+      script.onload = setupSearch;
+      script.src = "leaflet-search/leaflet-search.src.js";
+      document.body.appendChild(script);
     }
 
     var NPMap = {
