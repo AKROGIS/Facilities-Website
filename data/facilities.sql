@@ -164,18 +164,42 @@ WHERE
 -- select * from akr_facility2.gis.TRAILS_ATTRIBUTE_PT_evw WHERE FACASSETID IS NOT NULL
 
 SELECT
-  'triangle' AS [marker-symbol],
-  FACASSETID AS ID,
-  FACASSETID AS Photo_ID, --FIXME
-  Shape.STY AS Latitude, Shape.STX AS Longitude,
+  -- GIS
+  g.Marker AS [marker-symbol],
+  g.FACASSETID AS ID,
+  g.[Name] AS [NAME],
+  g.FACASSETID AS Photo_ID, --FIXME
+  g.Latitude, g.Longitude,
+  -- FMSS
   f.Location AS Parent,  
-  f.[Description] AS [Desc],
-  CASE WHEN TRLFEATTYPE = 'Other' THEN TRLFEATTYPEOTHER ELSE TRLFEATTYPE END + 
-    CASE WHEN TRLFEATSUBTYPE is NULL THEN '' ELSE ', ' + TRLFEATSUBTYPE END AS [Name]
+  f.[Description] AS [Desc]
 FROM
-  akr_facility2.gis.TRAILS_FEATURE_PT_evw AS g 
-JOIN
   akr_facility2.dbo.FMSSExport_Asset AS f
-ON g.FACASSETID = f.Asset
+JOIN
+  (
+      SELECT
+        'triangle' AS Marker,
+        FACASSETID,
+        CASE WHEN TRLFEATTYPE = 'Other' THEN TRLFEATTYPEOTHER ELSE TRLFEATTYPE END + 
+          CASE WHEN TRLFEATSUBTYPE is NULL THEN '' ELSE ', ' + TRLFEATSUBTYPE END AS [Name],
+        Shape.STY AS Latitude, Shape.STX AS Longitude
+      FROM
+        akr_facility2.gis.TRAILS_FEATURE_PT_evw
+      WHERE
+        FACASSETID IS NOT NULL
+    UNION ALL
+      SELECT
+        'circle' AS Marker,
+        FACASSETID,
+        CASE WHEN TRLATTRTYPE = 'Other' THEN TRLATTRTYPEOTHER ELSE TRLATTRTYPE END + 
+          CASE WHEN TRLATTRVALUE is NULL THEN '' ELSE ', ' + TRLATTRVALUE END AS [Name],
+        Shape.STY AS Latitude, Shape.STX AS Longitude
+      FROM
+        akr_facility2.gis.TRAILS_ATTRIBUTE_PT_evw
+      WHERE
+        FACASSETID IS NOT NULL
+  ) AS g 
+ON
+  g.FACASSETID = f.Asset
 WHERE
   g.FACASSETID IS NOT NULL
