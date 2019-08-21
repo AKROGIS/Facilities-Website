@@ -41,6 +41,14 @@
             initial: false,
             hideMarkerOnCollapse: true});
         map.addControl( controlSearch );
+        map.searchBox = controlSearch;  // cache this control on the global
+    }
+
+    function find(text) {
+      var map = NPMap.config.L;
+      map.closePopup();
+      map.searchBox.searchText(text);
+      map.searchBox._handleKeypress({keyCode: 13});
     }
 
     function npmapReady() {
@@ -72,7 +80,8 @@
                     '<tr><td class="att_name">Def. Maint</td><td>{{DM}}</td></tr>' +
                     '<tr><td class="att_name">Age</td><td>{{Age}}</td></tr>' +
                     '<tr><td class="att_name">Status</td><td>{{Status}}</td></tr>' +
-                    '<tr><td class="att_name">Parent</td><td>{{Parent}}</td></tr>' +
+                    '<tr><td class="att_name">Parent</td><td><a href="javascript:find(\'{{Parent}}\')">' + 
+                    '{{Parent}}</a></td></tr>' +
                     '</table>',
                 media:[{
                     type:"fmss",
