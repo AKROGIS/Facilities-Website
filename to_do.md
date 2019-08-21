@@ -5,7 +5,7 @@ To Do List
 * BUG: the tool tip tends to accumulate
 * Choose better markers
 * Centroids are not always within the feature (DENA dog kennal parking lot)
-* Add assets layer
+* Add ability to search the asset layer
 * Generalize the photo lookup algorithm (look at GEOMETRYID, etc, not just FACLOCID)
 * Cleanup the popup programatically:
   - if there is no Park Id, then remove it from the table

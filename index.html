@@ -34,7 +34,7 @@
     function setupSearch() {
         var map = NPMap.config.L;
         var controlSearch = new L.Control.Search({
-            layer: NPMap.config.overlays[0].L,
+            layer: NPMap.config.overlays[1].L,
             propertyName: "ID",
             zoom: 18,
             textPlaceholder:"FMSS ID",
@@ -69,6 +69,30 @@
         div: 'map',
         overlays: [
           {
+            cluster: true,
+            popup: {
+                title: '{{ID}}',
+                description: '<p>{{Name}}</p>' +
+                '<table>' +
+                    '<tr><td class="att_name">Description</td><td>{{Desc}}</td></tr>' +
+                    '<tr><td class="att_name">Parent</td><td><a href="javascript:find(\'{{Parent}}\')">' + 
+                    '{{Parent}}</a></td></tr>' +
+                    '</table>',
+                media:[{
+                    type:"fmss",
+                    id:"Photo_Id"
+                }]
+            },
+            styles: {
+              point: {
+                  'marker-symbol': 'triangle'
+              }
+            },
+            tooltip: '{{ID}}',
+            type: 'csv',
+            url: 'data/assets.csv'
+          }
+          ,{
             cluster: true,
             popup: {
                 title: '{{ID}}',

@@ -160,14 +160,22 @@ WHERE
 
 
 -- Items in GIS matching FMSS Asset records
-/*
-select * from akr_facility2.gis.TRAILS_ATTRIBUTE_PT_evw WHERE FACASSETID IS NOT NULL
 
-select FACASSETID AS ID, f.Location AS Parent, Shape.STY AS Latitude, Shape.STX AS Longitude, 
-CASE WHEN TRLFEATTYPE = 'Other' THEN TRLFEATTYPEOTHER ELSE TRLFEATTYPE END + 
-CASE WHEN TRLFEATSUBTYPE is NULL THEN '' ELSE ', ' + TRLFEATSUBTYPE END AS [Name], f.[Description] AS [Desc]
- from akr_facility2.gis.TRAILS_FEATURE_PT_evw AS g 
-join FMSSExport_Asset AS f on FACASSETID = f.Asset
- WHERE FACASSETID IS NOT NULL
- order by [Name]
-*/
+-- select * from akr_facility2.gis.TRAILS_ATTRIBUTE_PT_evw WHERE FACASSETID IS NOT NULL
+
+SELECT
+  'triangle' AS [marker-symbol],
+  FACASSETID AS ID,
+  FACASSETID AS Photo_ID, --FIXME
+  Shape.STY AS Latitude, Shape.STX AS Longitude,
+  f.Location AS Parent,  
+  f.[Description] AS [Desc],
+  CASE WHEN TRLFEATTYPE = 'Other' THEN TRLFEATTYPEOTHER ELSE TRLFEATTYPE END + 
+    CASE WHEN TRLFEATSUBTYPE is NULL THEN '' ELSE ', ' + TRLFEATSUBTYPE END AS [Name]
+FROM
+  akr_facility2.gis.TRAILS_FEATURE_PT_evw AS g 
+JOIN
+  akr_facility2.dbo.FMSSExport_Asset AS f
+ON g.FACASSETID = f.Asset
+WHERE
+  g.FACASSETID IS NOT NULL
