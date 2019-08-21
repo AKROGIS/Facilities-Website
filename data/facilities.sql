@@ -1,161 +1,173 @@
 -- //////////////////////////////////////////////////////////////////////
 -- Queries to get the CSV files which provide the operational point data for the Facilities Web application
 -- Written by Regan Sarwas, 2019-08-20 +/-
+--
+--  TODO: Consider adding facilities in GIS (that have photos?) even if not in FMSS
+--        ISEXTANT = 'True' AND ISOUTPARK <> 'Yes' AND P.FACMAINTAIN IN ('NPS','FEDERAL')
 -- //////////////////////////////////////////////////////////////////////
 
 -- Make sure we are using the DEFAULT version in SDE
 exec sde.set_default
 
-
+-- Facilities in GIS matching FMSS Location records
+SELECT
+    -- GIS Attributes
+    g.Marker AS [marker-symbol],
+    g.FACLOCID AS ID, g.MAPLABEL AS [Name],
+    g.Latitude, g.Longitude,
+    g.FACLOCID AS Photo_Id, -- FIXME (Pphotos may be linked to GEOMETRYID or FEATUREID or FACASSSETID)
+    -- FMSS Attributes
+    COALESCE(FORMAT(TRY_CAST(f.CRV AS FLOAT), 'C', 'en-us'), 'Unknown') AS CRV,
+    COALESCE(FORMAT(TRY_CAST(f.DM AS FLOAT), 'C', 'en-us'), 'Unknown') AS DM,
+    COALESCE(CONVERT(varchar, YEAR(GetDate()) - TRY_CONVERT(INT, f.YearBlt)), 'Unknown') AS Age,
+    f.Description AS [Desc],
+    COALESCE(COALESCE(f.PARKNAME, f.PARKNUMB), '')  AS [Park_Id],
+    f.Parent, f.Status AS [Status]
+FROM
+    akr_facility2.dbo.FMSSExport AS f
+JOIN
+    (
     -- Buildings (Center Point)
     SELECT
-    'warehouse' as [marker-symbol],
-    g.FACLOCID as ID, g.MAPLABEL as [Name],
-    g.Shape.STY as Latitude, g.Shape.STX as Longitude,
-    f.CRV as CRV, f.DM as DM, YEAR(GetDate()) - Try_Convert(int,f.YearBlt) as Age, f.Description as [Desc],
-    f.Parent, f.Status as Status, 
-    COALESCE(FACLOCID, COALESCE(FEATUREID, COALESCE(FACASSETID, GEOMETRYID))) AS Photo_Id
-    FROM [akr_facility2].[gis].[AKR_BLDG_CENTER_PT_evw] as g
-    JOIN [akr_facility2].[dbo].[FMSSExport] as f
-    on g.FACLOCID = f.Location
-    where g.FACLOCID is not null and f.[Type] = 'OPERATING'
-  UNION
+      'warehouse' AS Marker,
+      FACLOCID, MAPLABEL,
+      Shape.STY AS Latitude, Shape.STX AS Longitude
+    FROM
+      akr_facility2.gis.AKR_BLDG_CENTER_PT_evw
+    WHERE 
+      FACLOCID IS NOT NULL
+  UNION ALL
     -- Parking Lots (Centroid)
     SELECT
-    'parking' as [marker-symbol],
-    g.FACLOCID as ID, g.MAPLABEL as [Name],
-    g.Shape.STCentroid().STY as Latitude, g.Shape.STCentroid().STX as Longitude,
-    f.CRV as CRV, f.DM as DM, YEAR(GetDate()) - Try_Convert(int,f.YearBlt) as Age, f.Description as [Desc],
-    f.Parent, f.Status as Status,
-    COALESCE(FACLOCID, COALESCE(FEATUREID, COALESCE(FACASSETID, GEOMETRYID))) AS Photo_Id 
-    FROM [akr_facility2].[gis].[PARKLOTS_PY_evw] as g
-    JOIN [akr_facility2].[dbo].[FMSSExport] as f
-    on g.FACLOCID = f.Location
-    where g.FACLOCID is not null and f.[Type] = 'OPERATING'
-  UNION
+      'parking' AS Marker,
+      FACLOCID, MAPLABEL,
+      Shape.STCentroid().STY AS Latitude, Shape.STCentroid().STX AS Longitude
+    FROM
+      akr_facility2.gis.PARKLOTS_PY_evw
+    WHERE 
+      FACLOCID IS NOT NULL
+  UNION ALL
     -- Roads (All start and end points for a given FACLOCID that are not coincident
     --         with another end or start point respectively)
     SELECT 
-    'star' as [marker-symbol],
-    g.ID, g.[Name],
-    g.Latitude, g.Longitude,
-    f.CRV as CRV, f.DM as DM, YEAR(GetDate()) - Try_Convert(int,f.YearBlt) as Age, f.Description as [Desc],
-    f.Parent, f.Status as Status, 
-    g.ID AS Photo_Id
+      'star' AS Marker,
+      FACLOCID, MAPLABEL,
+      Latitude, Longitude
     FROM (
-            Select ID, Latitude, Longitude, [Name] FROM (
-                SELECT
-                Shape.STStartPoint().STY as Latitude, Shape.STStartPoint().STX as Longitude, FACLOCID as ID, MAPLABEL as [Name]
-                FROM [akr_facility2].[gis].[TRAILS_LN_evw] where faclocid is not null and ISBRIDGE = 'No'
-                UNION ALL
-                SELECT
-                Shape.STEndPoint().STY as Latitude, Shape.STEndPoint().STX as Longitude, FACLOCID as ID, MAPLABEL as [Name]
-                FROM [akr_facility2].[gis].[TRAILS_LN_evw] where faclocid is not null and ISBRIDGE = 'No'
-            ) as t
-            group by ID, Latitude, Longitude, [Name] having count(*) = 1
-    ) as g
-    JOIN [akr_facility2].[dbo].[FMSSExport] as f
-    on g.ID = f.Location
-    where f.[Type] = 'OPERATING'
-  UNION
+        SELECT
+          FACLOCID, MAPLABEL,
+          Shape.STStartPoint().STY AS Latitude, Shape.STStartPoint().STX AS Longitude
+        FROM
+          akr_facility2.gis.TRAILS_LN_evw
+        WHERE
+          FACLOCID IS NOT NULL AND ISBRIDGE = 'No'
+      UNION ALL
+        SELECT
+          FACLOCID, MAPLABEL,
+          Shape.STEndPoint().STY AS Latitude, Shape.STEndPoint().STX AS Longitude
+        FROM
+          akr_facility2.gis.TRAILS_LN_evw
+        WHERE
+          FACLOCID IS NOT NULL AND ISBRIDGE = 'No'
+      ) AS temp
+    GROUP BY
+      FACLOCID, MAPLABEL, Latitude, Longitude
+    HAVING
+      COUNT(*) = 1
+  UNION ALL
     -- Roads (All start and end points for a given FACLOCID that are not coincident
     --         with another end or start point respectively)
     SELECT
-    'bus' as [marker-symbol],
-    g.ID, g.[Name], g.Latitude, g.Longitude,
-    f.CRV as CRV, f.DM as DM, YEAR(GetDate()) - Try_Convert(int,f.YearBlt) as Age, f.Description as [Desc],
-    f.Parent, f.Status as Status, 
-    g.ID AS Photo_Id
+      'bus' AS Marker,
+      FACLOCID, MAPLABEL,
+      Latitude, Longitude
     FROM (
-            Select ID, Latitude, Longitude, [Name] FROM (
-                SELECT
-                Shape.STStartPoint().STY as Latitude, Shape.STStartPoint().STX as Longitude, FACLOCID as ID, MAPLABEL as [Name]
-                FROM [akr_facility2].[gis].[ROADS_LN_evw] where faclocid is not null and ISBRIDGE = 'No'
-                UNION ALL
-                SELECT
-                Shape.STEndPoint().STY as Latitude, Shape.STEndPoint().STX as Longitude, FACLOCID as ID, MAPLABEL as [Name]
-                FROM [akr_facility2].[gis].[ROADS_LN_evw] where faclocid is not null and ISBRIDGE = 'No'
-            ) as t
-            group by ID, Latitude, Longitude, [Name] having count(*) = 1
-    ) as g
-    JOIN [akr_facility2].[dbo].[FMSSExport] as f
-    on g.ID = f.Location
-    where f.[Type] = 'OPERATING'
-  UNION
+        SELECT
+          FACLOCID, MAPLABEL,
+          Shape.STStartPoint().STY AS Latitude, Shape.STStartPoint().STX AS Longitude
+        FROM akr_facility2.gis.ROADS_LN_evw
+        WHERE FACLOCID IS NOT NULL AND ISBRIDGE = 'No'
+      UNION ALL
+        SELECT
+          FACLOCID, MAPLABEL,
+          Shape.STEndPoint().STY AS Latitude, Shape.STEndPoint().STX AS Longitude
+        FROM
+          akr_facility2.gis.ROADS_LN_evw
+        WHERE
+          FACLOCID IS NOT NULL AND ISBRIDGE = 'No'
+      ) AS temp
+    GROUP BY
+      FACLOCID, MAPLABEL, Latitude, Longitude
+    HAVING
+      count(*) = 1
+  UNION ALL
     -- Trail Bridges (Middle vertex, or average of two middle vertices)
     SELECT
-    'square' as [marker-symbol],
-    g.FACLOCID as ID, g.MAPLABEL as [Name],
-    -- Get mid point of bridge
-    CASE WHEN (g.Shape.STNumPoints() % 2) = 0
-    THEN --Even number of vertices
-       (g.Shape.STPointN(g.Shape.STNumPoints()/2).STY + g.Shape.STPointN(1 + g.Shape.STNumPoints()/2).STY)/2.0
-    ELSE -- Odd
-       g.Shape.STPointN(1 + g.Shape.STNumPoints()/2).STY
-    END  as Latitude,
-    CASE WHEN (g.Shape.STNumPoints() % 2) = 0
-    THEN --Even
-       (g.Shape.STPointN(g.Shape.STNumPoints()/2).STX + g.Shape.STPointN(1 + g.Shape.STNumPoints()/2).STX)/2.0
-    ELSE -- Odd
-       g.Shape.STPointN(1 + g.Shape.STNumPoints()/2).STX
-    END as Longitude,
-    f.CRV as CRV, f.DM as DM, YEAR(GetDate()) - Try_Convert(int,f.YearBlt) as Age, f.Description as [Desc],
-    f.Parent, f.Status as Status, 
-    COALESCE(FACLOCID, COALESCE(FEATUREID, COALESCE(FACASSETID, GEOMETRYID))) AS Photo_Id 
-    FROM [akr_facility2].[gis].[ROADS_LN_evw] as g
-    JOIN [akr_facility2].[dbo].[FMSSExport] as f
-    on g.FACLOCID = f.Location
-    where g.FACLOCID is not null and g.ISBRIDGE = 'Yes' and f.[Type] = 'OPERATING'   
-  UNION
+      'square' AS Marker,
+      FACLOCID, MAPLABEL,
+      -- Mid point of bridge
+      CASE
+        WHEN
+          (Shape.STNumPoints() % 2) = 0
+        THEN --Even number of vertices
+          (Shape.STPointN(Shape.STNumPoints()/2).STY + Shape.STPointN(1 + Shape.STNumPoints()/2).STY)/2.0
+        ELSE -- Odd
+          Shape.STPointN(1 + Shape.STNumPoints()/2).STY
+      END AS Latitude,
+      CASE
+        WHEN
+          (Shape.STNumPoints() % 2) = 0
+        THEN --Even
+          (Shape.STPointN(Shape.STNumPoints()/2).STX + Shape.STPointN(1 + Shape.STNumPoints()/2).STX)/2.0
+        ELSE -- Odd
+          Shape.STPointN(1 + Shape.STNumPoints()/2).STX
+      END AS Longitude
+    FROM
+      akr_facility2.gis.ROADS_LN_evw
+    WHERE
+      FACLOCID IS NOT NULL AND ISBRIDGE = 'Yes'
+  UNION ALL
     -- Road Bridges (Middle vertex, or average of two middle vertices)
     SELECT
-    'square' as [marker-symbol],
-    g.FACLOCID as ID, g.MAPLABEL as [Name],
-    -- Get mid point of bridge
-    CASE WHEN (g.Shape.STNumPoints() % 2) = 0
-    THEN --Even number of vertices
-       (g.Shape.STPointN(g.Shape.STNumPoints()/2).STY + g.Shape.STPointN(1 + g.Shape.STNumPoints()/2).STY)/2.0
-    ELSE -- Odd
-       g.Shape.STPointN(1 + g.Shape.STNumPoints()/2).STY
-    END  as Latitude,
-    CASE WHEN (g.Shape.STNumPoints() % 2) = 0
-    THEN --Even
-       (g.Shape.STPointN(g.Shape.STNumPoints()/2).STX + g.Shape.STPointN(1 + g.Shape.STNumPoints()/2).STX)/2.0
-    ELSE -- Odd
-       g.Shape.STPointN(1 + g.Shape.STNumPoints()/2).STX
-    END as Longitude,
-    f.CRV as CRV, f.DM as DM, YEAR(GetDate()) - Try_Convert(int,f.YearBlt) as Age, f.Description as [Desc],
-    f.Parent, f.Status as Status, 
-    COALESCE(FACLOCID, COALESCE(FEATUREID, COALESCE(FACASSETID, GEOMETRYID))) AS Photo_Id 
-    FROM [akr_facility2].[gis].[TRAILS_LN_evw] as g
-    JOIN [akr_facility2].[dbo].[FMSSExport] as f
-    on g.FACLOCID = f.Location
-    where g.FACLOCID is not null and g.ISBRIDGE = 'Yes' and f.[Type] = 'OPERATING'   
+      'square' AS Marker,
+      FACLOCID, MAPLABEL,
+      -- Get mid point of bridge
+      CASE
+        WHEN
+          (Shape.STNumPoints() % 2) = 0
+        THEN --Even number of vertices
+          (Shape.STPointN(Shape.STNumPoints()/2).STY + Shape.STPointN(1 + Shape.STNumPoints()/2).STY)/2.0
+        ELSE -- Odd
+          Shape.STPointN(1 + Shape.STNumPoints()/2).STY
+      END AS Latitude,
+      CASE
+        WHEN
+          (Shape.STNumPoints() % 2) = 0
+        THEN --Even
+          (Shape.STPointN(Shape.STNumPoints()/2).STX + Shape.STPointN(1 + Shape.STNumPoints()/2).STX)/2.0
+        ELSE -- Odd
+          Shape.STPointN(1 + Shape.STNumPoints()/2).STX
+      END AS Longitude
+    FROM
+      akr_facility2.gis.TRAILS_LN_evw
+    WHERE
+      FACLOCID IS NOT NULL AND ISBRIDGE = 'Yes'
+    ) AS g 
+ON
+    g.FACLOCID = f.Location
+WHERE
+    f.[Type] = 'OPERATING'
 
-/*  Original Building Query
 
- 	 SELECT P.Shape.STY AS Latitude,  P.Shape.STX AS Longitude, P.FACLOCID as FMSS_Id,
-	        COALESCE(F.[Description], P.MAPLABEL) AS [Desc],
-	        COALESCE(FORMAT(CAST(F.CRV AS float), 'C', 'en-us'), 'unknown') AS Cost,
---			COALESCE(FORMAT(F.Qty, '0,0 Sq Ft', 'en-us'), 'unknown') AS Size, F.[Status] AS [Status], 
-			'unknown' AS Size, P.BLDGSTATUS AS [Status],
-			COALESCE(CAST(F.YearBlt AS nvarchar), 'unknown') AS [Year], P.FACOCCUPANT AS Occupant,
-			P.BLDGNAME AS [Name], P.PARKBLDGID AS Park_Id,
-            COALESCE(FACLOCID, COALESCE(FEATUREID, COALESCE(FACASSETID, GEOMETRYID))) AS Photo_Id
-       FROM gis.AKR_BLDG_CENTER_PT_evw as P
-  LEFT JOIN dbo.FMSSEXPORT as F
-         ON P.FACLOCID = F.Location
-	  WHERE P.ISEXTANT = 'True' AND (P.FACLOCID IS NOT NULL OR (P.ISOUTPARK <> 'Yes' AND P.FACMAINTAIN IN ('NPS','FEDERAL')))
-
-*/
+-- Items in GIS matching FMSS Asset records
 /*
-select * from [akr_facility2].[gis].[TRAILS_ATTRIBUTE_PT_evw] where FACASSETID is not null
+select * from akr_facility2.gis.TRAILS_ATTRIBUTE_PT_evw WHERE FACASSETID IS NOT NULL
 
-select g.FACASSETID as ID, f.Location as Parent, g.Shape.STY as Latitude, g.Shape.STX as Longitude, 
+select FACASSETID AS ID, f.Location AS Parent, Shape.STY AS Latitude, Shape.STX AS Longitude, 
 CASE WHEN TRLFEATTYPE = 'Other' THEN TRLFEATTYPEOTHER ELSE TRLFEATTYPE END + 
-CASE WHEN TRLFEATSUBTYPE is NULL THEN '' ELSE ', ' + TRLFEATSUBTYPE END as [Name], f.[Description] as [Desc]
- from [akr_facility2].[gis].[TRAILS_FEATURE_PT_evw] as g 
-join FMSSExport_Asset as f on g.FACASSETID = f.Asset
- where FACASSETID is not null
+CASE WHEN TRLFEATSUBTYPE is NULL THEN '' ELSE ', ' + TRLFEATSUBTYPE END AS [Name], f.[Description] AS [Desc]
+ from akr_facility2.gis.TRAILS_FEATURE_PT_evw AS g 
+join FMSSExport_Asset AS f on FACASSETID = f.Asset
+ WHERE FACASSETID IS NOT NULL
  order by [Name]
 */
