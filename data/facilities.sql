@@ -124,3 +124,13 @@
 	  WHERE P.ISEXTANT = 'True' AND (P.FACLOCID IS NOT NULL OR (P.ISOUTPARK <> 'Yes' AND P.FACMAINTAIN IN ('NPS','FEDERAL')))
 
 */
+
+select * from [akr_facility2].[gis].[TRAILS_ATTRIBUTE_PT] where FACASSETID is not null
+
+select g.FACASSETID as ID, f.Location as Parent, g.Shape.STY as Latitude, g.Shape.STX as Longitude, 
+CASE WHEN TRLFEATTYPE = 'Other' THEN TRLFEATTYPEOTHER ELSE TRLFEATTYPE END + 
+CASE WHEN TRLFEATSUBTYPE is NULL THEN '' ELSE ', ' + TRLFEATSUBTYPE END as [Name], f.[Description] as [Desc]
+ from [akr_facility2].[gis].[TRAILS_FEATURE_PT] as g 
+join FMSSExport_Asset as f on g.FACASSETID = f.Asset
+ where FACASSETID is not null
+ order by [Name]
