@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
     <title>NPS Facilities (Alaska)</title>
-    <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" type="text/css" href="leaflet-search/leaflet-search.src.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
   </head>
 
   <body>
@@ -33,13 +33,22 @@
 
     function setupSearch() {
         var map = NPMap.config.L;
+        var layerGroup = L.layerGroup([
+          NPMap.config.overlays[0].L,
+          NPMap.config.overlays[1].L
+        ]);
         var controlSearch = new L.Control.Search({
-            layer: NPMap.config.overlays[1].L,
+            layer: layerGroup,
             propertyName: "ID",
             zoom: 18,
             textPlaceholder:"FMSS ID",
             initial: false,
-            hideMarkerOnCollapse: true});
+            hideMarkerOnCollapse: true,
+            buildTip: function(text, val) {
+              var type = val.layer.feature.properties['marker-symbol'];
+              return '<a href="#" class="'+type+'">'+text+' <b>'+type+'</b></a>';
+            }
+          });
         map.addControl( controlSearch );
         map.searchBox = controlSearch;  // cache this control on the global
     }

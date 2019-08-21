@@ -228,3 +228,19 @@ ul.tilelist .blurb {
     width: 100%;
 }
 */
+.leaflet-control-search ul.search-tooltip {
+    min-width: 170px;
+}
+.search-tip b {
+	color: #fff;
+	background: rgb(47, 47, 122)
+}
+.search-tip {
+	white-space: nowrap;
+}
+.search-tip b {
+	clear: left;
+	float: right;
+	padding: 0 4px;
+	margin-left: 4px;
+}
