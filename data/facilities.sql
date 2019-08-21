@@ -161,8 +161,6 @@ WHERE
 
 -- Items in GIS matching FMSS Asset records
 
--- select * from akr_facility2.gis.TRAILS_ATTRIBUTE_PT_evw WHERE FACASSETID IS NOT NULL
-
 SELECT
   -- GIS
   g.Marker AS [marker-symbol],
@@ -178,6 +176,7 @@ FROM
 JOIN
   (
       SELECT
+        -- trail features
         'triangle' AS Marker,
         FACASSETID,
         CASE WHEN TRLFEATTYPE = 'Other' THEN TRLFEATTYPEOTHER ELSE TRLFEATTYPE END + 
@@ -188,6 +187,7 @@ JOIN
       WHERE
         FACASSETID IS NOT NULL
     UNION ALL
+      -- trail attributes (surface material, etc)
       SELECT
         'circle' AS Marker,
         FACASSETID,
@@ -198,6 +198,17 @@ JOIN
         akr_facility2.gis.TRAILS_ATTRIBUTE_PT_evw
       WHERE
         FACASSETID IS NOT NULL
+    UNION ALL
+      -- Buildings (typically out-buildings that are grouped with a main structure)
+      SELECT
+        'building' AS Marker,
+        FACASSETID,
+        MAPLABEL AS [Name],
+        Shape.STY AS Latitude, Shape.STX AS Longitude
+      FROM
+        akr_facility2.gis.AKR_BLDG_CENTER_PT_evw
+      WHERE
+        FACASSETID IS NOT NULL AND FACLOCID IS NULL
   ) AS g 
 ON
   g.FACASSETID = f.Asset

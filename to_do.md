@@ -16,3 +16,6 @@ To Do List
   - Add other location types (landscape, sites, etc), particularly those that are parents to current facilities
 * How to handle assets that have more than one location?
 * Enhance search to deal with multiple solutions (e.g. there are multiple trail points that have the same ID)
+* Assets do not cluster with locations.
+* Assets and Locations can overlap and hide one another (e.g. trail material is at the trail head)
+* Trail asset inventory report (how should they be ordered?)
