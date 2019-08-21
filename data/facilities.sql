@@ -13,13 +13,13 @@ exec sde.set_default
 SELECT
     -- GIS Attributes
     g.Marker AS [marker-symbol],
-    g.FACLOCID AS ID, g.MAPLABEL AS [Name],
+    g.FACLOCID AS ID, COALESCE(g.MAPLABEL, '') AS [Name],
     g.Latitude, g.Longitude,
     g.FACLOCID AS Photo_Id, -- FIXME (Pphotos may be linked to GEOMETRYID or FEATUREID or FACASSSETID)
     -- FMSS Attributes
     COALESCE(FORMAT(TRY_CAST(f.CRV AS FLOAT), 'C', 'en-us'), 'Unknown') AS CRV,
     COALESCE(FORMAT(TRY_CAST(f.DM AS FLOAT), 'C', 'en-us'), 'Unknown') AS DM,
-    COALESCE(CONVERT(varchar, YEAR(GetDate()) - TRY_CONVERT(INT, f.YearBlt)), 'Unknown') AS Age,
+    COALESCE(CONVERT(varchar, YEAR(GetDate()) - TRY_CONVERT(INT, f.YearBlt)) + ' yrs', 'Unknown') AS Age,
     f.Description AS [Desc],
     COALESCE(COALESCE(f.PARKNAME, f.PARKNUMB), '')  AS [Park_Id],
     f.Parent, f.Status AS [Status]
