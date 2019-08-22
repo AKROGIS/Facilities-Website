@@ -1,7 +1,6 @@
 To Do List
 ==========
 
-* Do not show a pop up for background image layer
 * BUG: the tool tip tends to accumulate
 * Choose better markers
 * Centroids are not always within the feature (DENA dog kennal parking lot)
@@ -19,3 +18,5 @@ To Do List
 * Assets do not cluster with locations.
 * Assets and Locations can overlap and hide one another (e.g. trail material is at the trail head)
 * Trail asset inventory report (how should they be ordered?)
+* BUG: Popups only work on first layer of an ESRI map service
+  - E.g. the Facilities Background Layer only shows popup (extended GIS information) for trails (the top layer)
