@@ -64,10 +64,12 @@
       // The last thing npmap-bootstrap.js does is add a script load to the DOM for npmap.js
       // search must be loaded after npmap.js, not just npmap-bootstrap.js, so we need to
       // wait for npmapReady() to be called before loading this script
+      
       var script = document.createElement( "script" )
       script.onload = setupSearch;
       script.src = "leaflet-search/leaflet-search.src.js";
       document.body.appendChild(script);
+      //setupSearch();
     }
 
     var NPMap = {
@@ -76,6 +78,10 @@
             lng: -152
         },
         div: 'map',
+        //plugins: [{
+        //  js: '../leaflet-search/leaflet-search.src.js'
+        //  // Loading css here trumps css loaded in the head
+        //}],
         overlays: [
           {
             cluster: true,
