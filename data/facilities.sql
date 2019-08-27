@@ -257,20 +257,3 @@ ON
   g.FACASSETID = f.Asset
 WHERE
   g.FACASSETID IS NOT NULL
-
-/*
-'Location ' + FACLOCID + ' is ' + convert(nvarchar(200),t1.miles) + ' miles in GIS, but ' + convert(nvarchar(200),t2.miles) + ' miles in FMSS (' + convert(nvarchar(200),100*(t1.miles - t2.miles)/ t2.miles) + '%)' as Details
-  from (select min(objectid) as oid, FACLOCID, sum(GEOGRAPHY::STGeomFromText(shape.STAsText(),4269).STLength()) * 0.000621371 as miles from gis.ROADS_LN_evw where faclocid is not null group by FACLOCID) as t1
-  join (select Location, convert(real, Qty) as miles from FMSSExport where UM = 'mi') as t2 on t1.FACLOCID = t2.Location
-  where abs(t1.miles - t2.miles)/ t2.miles > 0.2
-
-select oid, 'Error: Parking Area in GIS is more than 20% different from FMSS' as Issue,
-  'Location ' + FACLOCID + ' is ' + convert(nvarchar(200),t1.sf) + ' SF in GIS, but ' + convert(nvarchar(200),t2.sf) + ' SF in FMSS (' + convert(nvarchar(200),100*(t1.sf - t2.sf)/ t2.sf) + '%)' as Details
-  from (select min(objectid) as oid, FACLOCID, sum(GEOGRAPHY::STGeomFromText(shape.STAsText(),4269).STArea()) * 3.28084 * 3.28084 as sf from gis.PARKLOTS_PY_evw where faclocid is not null group by FACLOCID) as t1
-  join (select Location, convert(real, replace(Qty,',','')) as sf from FMSSExport where UM = 'SF') as t2 on t1.FACLOCID = t2.Location
-  where abs(t1.sf - t2.sf)/ t2.sf > 0.2
-  order by abs(t1.sf - t2.sf)
-
-  select * from akr_facility2.gis.TRAILS_LN_evw where FACLOCID = '108622'
-  select * FROM akr_facility2.dbo.FMSSExport where Location = '108622'
-*/
