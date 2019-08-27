@@ -101,8 +101,9 @@
                 }]
             },
             styles: function (data) {
-              var marker = 'triangle';
-              if (data.Kind == 'Trail') { marker = 'star'};
+              var marker = '?';
+              if (data.Kind == 'Trail') { marker = 't'};
+              if (data.Kind == 'Building') { marker = 'warehouse'};
               return {
                 point: {
                   'marker-color': '#4809A5',
