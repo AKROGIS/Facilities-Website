@@ -14,7 +14,6 @@ Facilities Web App - To Do List
   - if the location has assets (asset.location == ID), then create an expandable list of children
   - Add 'More...' button to open table with all FMSS Attributes (that we collect in our export)
   - Expand Park ID to include Number and Name (some info seems to be missing)
-  - Add trail and road length (GIS and FMSS)
   - (Optional) If there is no Park Id, then remove it from the table;
 * Button to submit issues to GIS helpdesk
 * BUG: Popups only work on first layer of an ESRI map service

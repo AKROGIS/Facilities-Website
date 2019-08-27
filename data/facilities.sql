@@ -22,6 +22,7 @@ SELECT
     COALESCE(CONVERT(varchar, YEAR(GetDate()) - TRY_CONVERT(INT, f.YearBlt)) + ' yrs', 'Unknown') AS Age,
     f.Description AS [Desc],
     COALESCE(COALESCE(f.PARKNAME, f.PARKNUMB), '')  AS [Park_Id],
+    f.Qty + ' ' + f.UM + g.Size as Size,
     f.Parent, f.Status AS [Status]
 FROM
     akr_facility2.dbo.FMSSExport AS f
@@ -31,7 +32,8 @@ JOIN
     SELECT
       'Building' AS Kind,
       FACLOCID, MAPLABEL,
-      Shape.STY AS Latitude, Shape.STX AS Longitude
+      Shape.STY AS Latitude, Shape.STX AS Longitude,
+      '' as Size
     FROM
       akr_facility2.gis.AKR_BLDG_CENTER_PT_evw
     WHERE 
@@ -41,7 +43,8 @@ JOIN
     SELECT
       'Parking' AS Kind,
       FACLOCID, MAPLABEL,
-      Shape.STCentroid().STY AS Latitude, Shape.STCentroid().STX AS Longitude
+      Shape.STCentroid().STY AS Latitude, Shape.STCentroid().STX AS Longitude,
+      ' (GIS: '+FORMAT(GEOGRAPHY::STGeomFromText(shape.STAsText(),4269).STArea() * 3.28084 * 3.28084,'N0') + 'sf)' as Size
     FROM
       akr_facility2.gis.PARKLOTS_PY_evw
     WHERE 
@@ -51,55 +54,93 @@ JOIN
     --         with another end or start point respectively)
     SELECT 
       'Trail' AS Kind,
-      FACLOCID, MAPLABEL,
-      Latitude, Longitude
+      g1.FACLOCID, g1.MAPLABEL,
+      g1.Latitude, g1.Longitude,
+      '(GIS: '+FORMAT(g2.Feet,'N0') + 'ft)' as Size
     FROM (
-        SELECT
-          FACLOCID, MAPLABEL,
-          Shape.STStartPoint().STY AS Latitude, Shape.STStartPoint().STX AS Longitude
-        FROM
-          akr_facility2.gis.TRAILS_LN_evw
-        WHERE
-          FACLOCID IS NOT NULL AND ISBRIDGE = 'No'
-      UNION ALL
-        SELECT
-          FACLOCID, MAPLABEL,
-          Shape.STEndPoint().STY AS Latitude, Shape.STEndPoint().STX AS Longitude
-        FROM
-          akr_facility2.gis.TRAILS_LN_evw
-        WHERE
-          FACLOCID IS NOT NULL AND ISBRIDGE = 'No'
-      ) AS temp
-    GROUP BY
-      FACLOCID, MAPLABEL, Latitude, Longitude
-    HAVING
-      COUNT(*) = 1
+      SELECT 
+        FACLOCID, MAPLABEL,
+        Latitude, Longitude
+      FROM (
+          SELECT
+            FACLOCID, MAPLABEL,
+            Shape.STStartPoint().STY AS Latitude, Shape.STStartPoint().STX AS Longitude
+          FROM
+            akr_facility2.gis.TRAILS_LN_evw
+          WHERE
+            FACLOCID IS NOT NULL AND ISBRIDGE = 'No'
+        UNION ALL
+          SELECT
+            FACLOCID, MAPLABEL,
+            Shape.STEndPoint().STY AS Latitude, Shape.STEndPoint().STX AS Longitude
+          FROM
+            akr_facility2.gis.TRAILS_LN_evw
+          WHERE
+            FACLOCID IS NOT NULL AND ISBRIDGE = 'No'
+        ) AS temp
+      GROUP BY
+        FACLOCID, MAPLABEL, Latitude, Longitude
+      HAVING
+        COUNT(*) = 1
+    ) AS g1
+    JOIN (
+      SELECT
+        FACLOCID,
+        SUM(GEOGRAPHY::STGeomFromText(shape.STAsText(),4269).STLength()) * 3.28084 as Feet
+      FROM
+        akr_facility2.gis.TRAILS_LN_evw
+      WHERE
+        FACLOCID IS NOT NULL
+      GROUP BY
+        FACLOCID
+    ) AS g2
+    ON g1.FACLOCID = g2.FACLOCID
   UNION ALL
     -- Roads (All start and end points for a given FACLOCID that are not coincident
     --         with another end or start point respectively)
     SELECT
       'Road' AS Kind,
-      FACLOCID, MAPLABEL,
-      Latitude, Longitude
+      g1.FACLOCID, g1.MAPLABEL,
+      g1.Latitude, g1.Longitude,
+      ' (GIS: '+FORMAT(g2.Miles,'N2') + 'mi)' as Size
     FROM (
-        SELECT
-          FACLOCID, MAPLABEL,
-          Shape.STStartPoint().STY AS Latitude, Shape.STStartPoint().STX AS Longitude
-        FROM akr_facility2.gis.ROADS_LN_evw
-        WHERE FACLOCID IS NOT NULL AND ISBRIDGE = 'No'
-      UNION ALL
-        SELECT
-          FACLOCID, MAPLABEL,
-          Shape.STEndPoint().STY AS Latitude, Shape.STEndPoint().STX AS Longitude
-        FROM
-          akr_facility2.gis.ROADS_LN_evw
-        WHERE
-          FACLOCID IS NOT NULL AND ISBRIDGE = 'No'
-      ) AS temp
-    GROUP BY
-      FACLOCID, MAPLABEL, Latitude, Longitude
-    HAVING
-      count(*) = 1
+      SELECT 
+        FACLOCID, MAPLABEL,
+        Latitude, Longitude
+      FROM (
+          SELECT
+            FACLOCID, MAPLABEL,
+            Shape.STStartPoint().STY AS Latitude, Shape.STStartPoint().STX AS Longitude
+          FROM
+            akr_facility2.gis.ROADS_LN_evw
+          WHERE
+            FACLOCID IS NOT NULL AND ISBRIDGE = 'No'
+        UNION ALL
+          SELECT
+            FACLOCID, MAPLABEL,
+            Shape.STEndPoint().STY AS Latitude, Shape.STEndPoint().STX AS Longitude
+          FROM
+            akr_facility2.gis.ROADS_LN_evw
+          WHERE
+            FACLOCID IS NOT NULL AND ISBRIDGE = 'No'
+        ) AS temp
+      GROUP BY
+        FACLOCID, MAPLABEL, Latitude, Longitude
+      HAVING
+        COUNT(*) = 1
+    ) AS g1
+    JOIN (
+      SELECT
+        FACLOCID,
+        SUM(GEOGRAPHY::STGeomFromText(shape.STAsText(),4269).STLength()) * 0.000621371 as Miles
+      FROM
+        akr_facility2.gis.ROADS_LN_evw
+      WHERE
+        FACLOCID IS NOT NULL
+      GROUP BY
+        FACLOCID
+    ) AS g2
+    ON g1.FACLOCID = g2.FACLOCID
   UNION ALL
     -- Trail Bridges (Middle vertex, or average of two middle vertices)
     SELECT
@@ -121,7 +162,8 @@ JOIN
           (Shape.STPointN(Shape.STNumPoints()/2).STX + Shape.STPointN(1 + Shape.STNumPoints()/2).STX)/2.0
         ELSE -- Odd
           Shape.STPointN(1 + Shape.STNumPoints()/2).STX
-      END AS Longitude
+      END AS Longitude,
+      '' AS Size
     FROM
       akr_facility2.gis.ROADS_LN_evw
     WHERE
@@ -147,12 +189,13 @@ JOIN
           (Shape.STPointN(Shape.STNumPoints()/2).STX + Shape.STPointN(1 + Shape.STNumPoints()/2).STX)/2.0
         ELSE -- Odd
           Shape.STPointN(1 + Shape.STNumPoints()/2).STX
-      END AS Longitude
+      END AS Longitude,
+      '' AS Size
     FROM
       akr_facility2.gis.TRAILS_LN_evw
     WHERE
       FACLOCID IS NOT NULL AND ISBRIDGE = 'Yes'
-    ) AS g 
+  ) AS g 
 ON
     g.FACLOCID = f.Location
 WHERE
@@ -214,3 +257,20 @@ ON
   g.FACASSETID = f.Asset
 WHERE
   g.FACASSETID IS NOT NULL
+
+/*
+'Location ' + FACLOCID + ' is ' + convert(nvarchar(200),t1.miles) + ' miles in GIS, but ' + convert(nvarchar(200),t2.miles) + ' miles in FMSS (' + convert(nvarchar(200),100*(t1.miles - t2.miles)/ t2.miles) + '%)' as Details
+  from (select min(objectid) as oid, FACLOCID, sum(GEOGRAPHY::STGeomFromText(shape.STAsText(),4269).STLength()) * 0.000621371 as miles from gis.ROADS_LN_evw where faclocid is not null group by FACLOCID) as t1
+  join (select Location, convert(real, Qty) as miles from FMSSExport where UM = 'mi') as t2 on t1.FACLOCID = t2.Location
+  where abs(t1.miles - t2.miles)/ t2.miles > 0.2
+
+select oid, 'Error: Parking Area in GIS is more than 20% different from FMSS' as Issue,
+  'Location ' + FACLOCID + ' is ' + convert(nvarchar(200),t1.sf) + ' SF in GIS, but ' + convert(nvarchar(200),t2.sf) + ' SF in FMSS (' + convert(nvarchar(200),100*(t1.sf - t2.sf)/ t2.sf) + '%)' as Details
+  from (select min(objectid) as oid, FACLOCID, sum(GEOGRAPHY::STGeomFromText(shape.STAsText(),4269).STArea()) * 3.28084 * 3.28084 as sf from gis.PARKLOTS_PY_evw where faclocid is not null group by FACLOCID) as t1
+  join (select Location, convert(real, replace(Qty,',','')) as sf from FMSSExport where UM = 'SF') as t2 on t1.FACLOCID = t2.Location
+  where abs(t1.sf - t2.sf)/ t2.sf > 0.2
+  order by abs(t1.sf - t2.sf)
+
+  select * from akr_facility2.gis.TRAILS_LN_evw where FACLOCID = '108622'
+  select * FROM akr_facility2.dbo.FMSSExport where Location = '108622'
+*/
