@@ -231,9 +231,13 @@ ul.tilelist .blurb {
 .leaflet-control-search ul.search-tooltip {
     min-width: 170px;
 }
-.search-tip b {
+.search-tip.Locations b{
 	color: #fff;
-	background: rgb(47, 47, 122)
+	background: #000;
+}
+.search-tip.Assets b {
+	color: #fff;
+	background: #4809A5;
 }
 .search-tip {
 	white-space: nowrap;
@@ -242,5 +246,6 @@ ul.tilelist .blurb {
 	clear: left;
 	float: right;
 	padding: 0 4px;
-	margin-left: 4px;
+    margin-left: 4px;
+    font-size: .8em;
 }

@@ -45,8 +45,9 @@
             initial: false,
             hideMarkerOnCollapse: true,
             buildTip: function(text, val) {
-              var type = val.layer.feature.properties['marker-symbol'];
-              return '<a href="#" class="'+type+'">'+text+' <b>'+type+'</b></a>';
+              var type = val.layer.feature.properties['Kind'];
+              var name = val.layer.options.name;
+              return '<a href="#" class="'+name+'">'+text+' <b>'+type+'</b></a>';
             }
           });
         map.addControl( controlSearch );
@@ -85,6 +86,7 @@
         overlays: [
           {
             cluster: true,
+            name: 'Assets',
             popup: {
                 title: 'Asset {{ID}}',
                 description: '<p>{{Name}}</p>' +
@@ -98,10 +100,16 @@
                     id:"Photo_Id"
                 }]
             },
-            styles: {
-              point: {
-                  'marker-symbol': 'triangle'
-              }
+            styles: function (data) {
+              var marker = 'triangle';
+              if (data.Kind == 'Trail') { marker = 'star'};
+              return {
+                point: {
+                  'marker-color': '#4809A5',
+                  'marker-size': 'small',
+                  'marker-symbol': marker
+                }
+              };
             },
             tooltip: '{{ID}}',
             type: 'csv',
@@ -109,6 +117,7 @@
           }
           ,{
             cluster: true,
+            name: 'Locations',
             popup: {
                 title: 'Location {{ID}}',
                 description: '<p>{{Name}}</p>' +
@@ -127,10 +136,18 @@
                     id:"Photo_Id"
                 }]
             },
-            styles: {
-              point: {
-                  'marker-symbol': 'square'
-              }
+            styles: function (data) {
+              var marker = '?';
+              if (data.Kind == 'Parking') { marker = 'parking'};
+              if (data.Kind == 'Road') { marker = 'bus'};
+              if (data.Kind == 'Trail') { marker = 't'};
+              if (data.Kind == 'Building') { marker = 'warehouse'};
+              if (data.Kind == 'Bridge') { marker = 'h'};
+              return {
+                point: {
+                  'marker-symbol': marker
+                }
+              };
             },
             tooltip: '{{ID}}',
             type: 'csv',
