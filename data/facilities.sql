@@ -12,7 +12,7 @@ exec sde.set_default
 -- Facilities in GIS matching FMSS Location records
 SELECT
     -- GIS Attributes
-    g.Marker AS [marker-symbol],
+    g.Kind,
     g.FACLOCID AS ID, COALESCE(g.MAPLABEL, '') AS [Name],
     g.Latitude, g.Longitude,
     g.FACLOCID AS Photo_Id, -- FIXME (Pphotos may be linked to GEOMETRYID or FEATUREID or FACASSSETID)
@@ -29,7 +29,7 @@ JOIN
     (
     -- Buildings (Center Point)
     SELECT
-      'warehouse' AS Marker,
+      'Building' AS Kind,
       FACLOCID, MAPLABEL,
       Shape.STY AS Latitude, Shape.STX AS Longitude
     FROM
@@ -39,7 +39,7 @@ JOIN
   UNION ALL
     -- Parking Lots (Centroid)
     SELECT
-      'parking' AS Marker,
+      'Parking' AS Kind,
       FACLOCID, MAPLABEL,
       Shape.STCentroid().STY AS Latitude, Shape.STCentroid().STX AS Longitude
     FROM
@@ -47,10 +47,10 @@ JOIN
     WHERE 
       FACLOCID IS NOT NULL
   UNION ALL
-    -- Roads (All start and end points for a given FACLOCID that are not coincident
+    -- Trails (All start and end points for a given FACLOCID that are not coincident
     --         with another end or start point respectively)
     SELECT 
-      'star' AS Marker,
+      'Trail' AS Kind,
       FACLOCID, MAPLABEL,
       Latitude, Longitude
     FROM (
@@ -78,7 +78,7 @@ JOIN
     -- Roads (All start and end points for a given FACLOCID that are not coincident
     --         with another end or start point respectively)
     SELECT
-      'bus' AS Marker,
+      'Road' AS Kind,
       FACLOCID, MAPLABEL,
       Latitude, Longitude
     FROM (
@@ -103,7 +103,7 @@ JOIN
   UNION ALL
     -- Trail Bridges (Middle vertex, or average of two middle vertices)
     SELECT
-      'square' AS Marker,
+      'Bridge' AS Kind,
       FACLOCID, MAPLABEL,
       -- Mid point of bridge
       CASE
@@ -129,7 +129,7 @@ JOIN
   UNION ALL
     -- Road Bridges (Middle vertex, or average of two middle vertices)
     SELECT
-      'square' AS Marker,
+      'Bridge' AS Kind,
       FACLOCID, MAPLABEL,
       -- Get mid point of bridge
       CASE
@@ -163,7 +163,7 @@ WHERE
 
 SELECT
   -- GIS
-  g.Marker AS [marker-symbol],
+  g.Kind,
   g.FACASSETID AS ID,
   g.[Name] AS [Name],
   g.FACASSETID AS Photo_ID, --FIXME
@@ -177,7 +177,7 @@ JOIN
   (
       SELECT
         -- trail features
-        'triangle' AS Marker,
+        'Trail' AS Kind,
         FACASSETID,
         CASE WHEN TRLFEATTYPE = 'Other' THEN TRLFEATTYPEOTHER ELSE TRLFEATTYPE END + 
           CASE WHEN TRLFEATSUBTYPE is NULL THEN '' ELSE ', ' + TRLFEATSUBTYPE END AS [Name],
@@ -189,7 +189,7 @@ JOIN
     UNION ALL
       -- trail attributes (surface material, etc)
       SELECT
-        'circle' AS Marker,
+        'Trail' AS Kind,
         FACASSETID,
         CASE WHEN TRLATTRTYPE = 'Other' THEN TRLATTRTYPEOTHER ELSE TRLATTRTYPE END + 
           CASE WHEN TRLATTRVALUE is NULL THEN '' ELSE ', ' + TRLATTRVALUE END AS [Name],
@@ -201,7 +201,7 @@ JOIN
     UNION ALL
       -- Buildings (typically out-buildings that are grouped with a main structure)
       SELECT
-        'building' AS Marker,
+        'Building' AS Kind,
         FACASSETID,
         MAPLABEL AS [Name],
         Shape.STY AS Latitude, Shape.STX AS Longitude
