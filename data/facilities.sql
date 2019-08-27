@@ -165,7 +165,7 @@ SELECT
   -- GIS
   g.Marker AS [marker-symbol],
   g.FACASSETID AS ID,
-  g.[Name] AS [NAME],
+  g.[Name] AS [Name],
   g.FACASSETID AS Photo_ID, --FIXME
   g.Latitude, g.Longitude,
   -- FMSS
