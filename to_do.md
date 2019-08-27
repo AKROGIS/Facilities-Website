@@ -9,11 +9,12 @@ Facilities Web App - To Do List
 * Add Denali Trail Asset Photos (many photos do not have FACASSETID)
   - Generalize the photo lookup algorithm (look at GEOMETRYID, etc, not just FACLOCID)
   - Add all facilities with photos (even when FACLOCID/FACASSSETID are null)?
-* Cleanup the popup programatically:
+* Cleanup the popup:
   - if the location has children (location with parent == ID), then create an expandable/clickable list of children
   - if the location has assets (asset.location == ID), then create an expandable list of children
   - Add 'More...' button to open table with all FMSS Attributes (that we collect in our export)
   - Expand Park ID to include Number and Name (some info seems to be missing)
+  - if FMSS.Yearblt is not a 4 digit integer display text (could be 'Planned', or 'm/d/yr', or 'NA'); change label to 'Year Built'
   - (Optional) If there is no Park Id, then remove it from the table;
 * Button to submit issues to GIS helpdesk
 * BUG: Popups only work on first layer of an ESRI map service
@@ -35,4 +36,4 @@ Facilities Web App - To Do List
   - How do I know the order of the assets along the trail?
 * Re-watermark all photos on website (see Kennecott bridge)
 * Search on Name, Description, Park ID, ...
-
+* Set styling of the Search widget to match npmap styling
