@@ -209,43 +209,58 @@ SELECT
   g.Kind,
   g.FACASSETID AS ID,
   g.[Name] AS [Name],
-  g.FACASSETID AS Photo_ID, --FIXME
+  g.Photo_Id,
   g.Latitude, g.Longitude,
   -- FMSS
   f.Location AS Parent,  
   f.[Description] AS [Desc]
 FROM
   akr_facility2.dbo.FMSSExport_Asset AS f
-JOIN
+RIGHT JOIN
   (
       SELECT
         -- trail features
         'Trail' AS Kind,
-        FACASSETID,
-        CASE WHEN TRLFEATTYPE = 'Other' THEN TRLFEATTYPEOTHER ELSE TRLFEATTYPE END + 
-          CASE WHEN TRLFEATSUBTYPE is NULL THEN '' ELSE ', ' + TRLFEATSUBTYPE END AS [Name],
-        Shape.STY AS Latitude, Shape.STX AS Longitude
+        f.FACASSETID,
+        COALESCE(p.FACLOCID, COALESCE(p.FACASSETID, COALESCE(p.FEATUREID, p.GEOMETRYID))) AS Photo_Id,
+        CASE WHEN f.TRLFEATTYPE = 'Other' THEN f.TRLFEATTYPEOTHER ELSE f.TRLFEATTYPE END + 
+          CASE WHEN f.TRLFEATSUBTYPE is NULL THEN '' ELSE ', ' + f.TRLFEATSUBTYPE END AS [Name],
+        f.Shape.STY AS Latitude, f.Shape.STX AS Longitude
       FROM
-        akr_facility2.gis.TRAILS_FEATURE_PT_evw
+        akr_facility2.gis.TRAILS_FEATURE_PT_evw AS f
+      JOIN
+        akr_facility2.gis.AKR_ATTACH_evw AS p
+      ON
+        -- FIXME Breaks if a ATTACH has more than one foreign key (i.e. a photo of more than one object)
+        f.GEOMETRYID = p.GEOMETRYID OR f.FEATUREID = p.FEATUREID 
+        --f.FACLOCID = p.FACLOCID OR f.FACASSETID = p.FACASSETID OR f.FEATUREID = p.FEATUREID OR f.GEOMETRYID = p.GEOMETRYID
       WHERE
-        FACASSETID IS NOT NULL
+        f.FACASSETID IS NOT NULL OR p.ATCHLINK IS NOT NULL
     UNION ALL
       -- trail attributes (surface material, etc)
       SELECT
         'Trail' AS Kind,
-        FACASSETID,
-        CASE WHEN TRLATTRTYPE = 'Other' THEN TRLATTRTYPEOTHER ELSE TRLATTRTYPE END + 
-          CASE WHEN TRLATTRVALUE is NULL THEN '' ELSE ', ' + TRLATTRVALUE END AS [Name],
-        Shape.STY AS Latitude, Shape.STX AS Longitude
+        a.FACASSETID,
+        COALESCE(p.FACLOCID, COALESCE(p.FACASSETID, COALESCE(p.FEATUREID, p.GEOMETRYID))) AS Photo_Id,
+        CASE WHEN a.TRLATTRTYPE = 'Other' THEN a.TRLATTRTYPEOTHER ELSE a.TRLATTRTYPE END + 
+          CASE WHEN a.TRLATTRVALUE is NULL THEN '' ELSE ', ' + a.TRLATTRVALUE END AS [Name],
+        a.Shape.STY AS Latitude, a.Shape.STX AS Longitude
       FROM
-        akr_facility2.gis.TRAILS_ATTRIBUTE_PT_evw
+        akr_facility2.gis.TRAILS_ATTRIBUTE_PT_evw AS a
+      JOIN
+        akr_facility2.gis.AKR_ATTACH_evw AS p
+      ON
+        -- FIXME Breaks if a ATTACH has more than one foreign key (i.e. a photo of more than one object)
+        -- FIXME: The general solution is VERY! slow
+        a.FACLOCID = p.FACLOCID -- OR a.FACASSETID = p.FACASSETID OR a.FEATUREID = p.FEATUREID OR a.GEOMETRYID = p.GEOMETRYID
       WHERE
-        FACASSETID IS NOT NULL
+        a.FACASSETID IS NOT NULL OR p.ATCHLINK IS NOT NULL
     UNION ALL
       -- Buildings (typically out-buildings that are grouped with a main structure)
       SELECT
         'Building' AS Kind,
         FACASSETID,
+        FACASSETID AS Photo_Id,
         MAPLABEL AS [Name],
         Shape.STY AS Latitude, Shape.STX AS Longitude
       FROM
@@ -255,5 +270,4 @@ JOIN
   ) AS g 
 ON
   g.FACASSETID = f.Asset
-WHERE
-  g.FACASSETID IS NOT NULL
+
