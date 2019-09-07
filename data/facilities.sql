@@ -207,13 +207,13 @@ WHERE
 SELECT
   -- GIS
   g.Kind,
-  g.FACASSETID AS ID,
+  COALESCE(g.FACASSETID, 'N/A') AS ID,
   g.[Name] AS [Name],
   g.Photo_Id,
   g.Latitude, g.Longitude,
   -- FMSS
   f.Location AS Parent,  
-  f.[Description] AS [Desc]
+  COALESCE(f.[Description], 'Not an FMSS Asset') AS [Desc]
 FROM
   akr_facility2.dbo.FMSSExport_Asset AS f
 RIGHT JOIN
