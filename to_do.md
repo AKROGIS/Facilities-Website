@@ -7,14 +7,14 @@ Pending Features
   - Expandable list of child LOCATIONs;  Clickable if we have a marker.
   - Expandable list of LOCATION's Assets;  Clickable if we have a marker.
   - Add a 'More...' button to open table with additional attributes for LOCATION (Note: we do not import everything)
-  - See **Known Bugs** below for more
+  - Fix **Known Bugs** (see list below)
 * Enhance search to deal with multiple solutions
   - Examples:
     - Roads and trails have at least two markers, and often more
     - Culverts may have one FMSS record, but multiple locations
   - Currently search just zooms to one (randomly selected) solution
   - What behavior do we want?
-    - hightlight all and zoom to extent of all
+    - highlight all and zoom to extent of all
     - sidebar with clickable list of found items
     - expand filter list to show all options
       - How would these be distinguish if they only differ by location? 
