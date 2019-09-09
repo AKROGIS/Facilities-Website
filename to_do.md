@@ -17,7 +17,7 @@ Pending Features
     - highlight all and zoom to extent of all
     - sidebar with clickable list of found items
     - expand filter list to show all options
-      - How would these be distinguish if they only differ by location? 
+      - How would these be distinguished if they only differ by location? 
     - ??? 
 * _Improve me_ button (email GIS helpdesk)
 * _Zoom to previous extents_ button
