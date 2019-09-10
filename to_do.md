@@ -21,6 +21,7 @@ Pending Features
     - ??? 
 * _Improve me_ button (email GIS helpdesk)
 * _Zoom to previous extents_ button
+* _Legend/Quick Start_ Button
 * _Reports_ Button
   - Trail assets sorted by distance from trailhead with photos
   - LOCATIONs/Assets without a location
