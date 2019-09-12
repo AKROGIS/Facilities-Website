@@ -4,7 +4,7 @@
 * A tool for locating the maintained infrastructure in Alaska
     - focus on locations and photos
     - location includes extent for roads, trails, parkinglots, etc
-    - meant to be simple and fast (not a swiss army knife)
+    - meant to be very fast and simple (it is **not** a swiss army knife)
 
 * History and old features
     - Prototype app for buildings has been around since early 2015
@@ -27,7 +27,7 @@
     - Note Locations do not always match the imagery exactly
         - it may be the accuracy of the GPS device used,
         - or inaccuracy in the imagery
-        - or an error in the GPS
+        - or it may be an error
 
 * Map Navigation
     - Zoom to Home
@@ -37,8 +37,9 @@
 
 * Additional feature beyond buildings
     - We have now added Roads, Parking Lots, Bridges, Trails, and Trail side Features
-    - we still plan to add I&M, Maintained Landscapes, and parents for all the above
-    - ideally we would have locations for all FMSS locations/Assets
+    - We plan to add IM, Maintained Landscapes, Utilities and parents for all the above
+      - When location is obvious.
+    - Ideally we would have locations for all FMSS locations/Assets
     - We are still working on symbology (the variability of imagery makes this tricky)
         - labels only on FMSS Roads and trails
         - markers only at ends of roads/trails
@@ -64,4 +65,5 @@
 * Close out
     - Show and Discuss TO DO list
     - Solicit questions and missing requirements
+    - URL is live give it a try and provide your feedback
     - Request ideas for outreach
