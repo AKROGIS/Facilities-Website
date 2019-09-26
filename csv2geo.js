@@ -1,27 +1,11 @@
 /*
-* Copyright 2013 - GPL
-* Iván Eixarch <ivan@sinanimodelucro.org>
-* https://github.com/joker-x/Leaflet.geoCSV
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 2 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-* MA 02110-1301, USA.
-*/
+ * Adapted from code at
+ * 1) https://github.com/joker-x/Leaflet.geoCSV by Iván Eixarch <ivan@sinanimodelucro.org>
+ * 2) https://github.com/d3/d3-dsv/blob/master/src/dsv.js
+ */
 
 L.GeoCSV = L.GeoJSON.extend({
 
-  //opciones por defecto
   options: {
     firstLineTitles: true,
     fieldSeparator: ',',
@@ -31,7 +15,6 @@ L.GeoCSV = L.GeoJSON.extend({
   },
 
   initialize: function (csv, options) {
-    this._propertiesNames = [];
     L.Util.setOptions (this, options);
     L.GeoJSON.prototype.initialize.call (this, csv, options);
   },
@@ -55,12 +38,12 @@ L.GeoCSV = L.GeoJSON.extend({
   },
 
   _csv2json: function (rows) {
-    function pointFeature(lat,lng,props) {
+    function pointFeature(lat, lon, props) {
       return {
         type: "Feature",
         geometry: {
           type: "Point",
-          coordinates: [lng,lat]
+          coordinates: [lon,lat]
         },
         properties: props
       };
