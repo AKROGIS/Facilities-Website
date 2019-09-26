@@ -171,3 +171,14 @@ geoJson['features'].forEach(ele => {
 	console.log(ele.geometry);
 	console.log(ele.properties);
 });
+
+// both parse and parseRows take an optional second argument which is a function that takes
+// an array of strings and an optional index number for the row,  The function can filter the
+// row (return null), or trtansmogrify the row into an array of typed values. As this is essentially
+// tabular data, the number of items in the array, nor the meaning of an item in the array should be changed.
+// The following might not be stated correctly.  I.e. all rows with an year as item 0 could return an age ass item 0
+// it must be applied to all rows, also a Y,M,D,Hr,Min could be returned as one datetime (header needs fixing)
+//
+// Test a CSV file without a header, and one with a replaced header
+// test with a filter and a map
+// test with the default 'autotype' map provided by dsv
