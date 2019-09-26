@@ -65,7 +65,7 @@
       // The last thing npmap-bootstrap.js does is add a script load to the DOM for npmap.js
       // search must be loaded after npmap.js, not just npmap-bootstrap.js, so we need to
       // wait for npmapReady() to be called before loading this script
-      
+
       var script = document.createElement( "script" )
       script.onload = setupSearch;
       script.src = "leaflet-search/leaflet-search.src.js";
@@ -92,7 +92,7 @@
                 description: '<p>{{Name}}</p>' +
                 '<table>' +
                     '<tr><td class="att_name">Description</td><td>{{Desc}}</td></tr>' +
-                    '<tr><td class="att_name">Parent</td><td><a href="javascript:find(\'{{Parent}}\')">' + 
+                    '<tr><td class="att_name">Parent</td><td><a href="javascript:find(\'{{Parent}}\')">' +
                     '{{Parent}}</a></td></tr>' +
                     '</table>',
                 media:[{
@@ -130,7 +130,7 @@
                     '<tr><td class="att_name">Age</td><td>{{Age}}</td></tr>' +
                     '<tr><td class="att_name">Size</td><td>{{Size}}</td></tr>' +
                     '<tr><td class="att_name">Status</td><td>{{Status}}</td></tr>' +
-                    '<tr><td class="att_name">Parent</td><td><a href="javascript:find(\'{{Parent}}\')">' + 
+                    '<tr><td class="att_name">Parent</td><td><a href="javascript:find(\'{{Parent}}\')">' +
                     '{{Parent}}</a></td></tr>' +
                     '</table>',
                 media:[{
@@ -181,6 +181,6 @@
         .then(data => photos = data);
 
     </script>
-    <script src="npmap/npmap-bootstrap.js"></script>
+    <script src="../npmap/npmap-bootstrap.js"></script>
   </body>
 </html>

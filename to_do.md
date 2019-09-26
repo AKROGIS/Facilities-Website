@@ -17,8 +17,8 @@ Pending Features
     - highlight all and zoom to extent of all
     - sidebar with clickable list of found items
     - expand filter list to show all options
-      - How would these be distinguished if they only differ by location? 
-    - ??? 
+      - How would these be distinguished if they only differ by location?
+    - ???
 * _Improve me_ button (email GIS helpdesk)
 * _Zoom to previous extents_ button
 * _Legend/Quick Start_ Button
@@ -52,8 +52,6 @@ Known Bugs
 
 Major Data Editing Tasks
 ------------------------
-* Finish assigning asset IDs to 2015 DENA trail survey
-* 2015 DENA trail survey QC issues
 * Add 2019 Chilkoot Trail features
 * Add Bartlet Cove assets
 * Add 2019 WRST Trail survey
