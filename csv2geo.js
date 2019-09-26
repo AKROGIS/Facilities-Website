@@ -79,19 +79,19 @@ L.GeoCSV = L.GeoJSON.extend({
         return pointFeature(lat,lon,props);
       });
     } else {
-      var ilat = this.options.titles.indexof(this.options.latitudeTitle);
-      var ilon = this.options.titles.indexof(this.options.longitudeTitle);
-      json["features"] = rows.map(element => {
-        var lat = element[ilat];
-        var lon = element[ilon];
+      var ilat = this.options.titles.indexOf(this.options.latitudeTitle);
+      var ilon = this.options.titles.indexOf(this.options.longitudeTitle);
+      json["features"] = rows.map(row => {
+        var lat = row[ilat];
+        var lon = row[ilon];
         // TODO return null if lat/lon is invalid
         props = {}
-        element.array.forEach(element, i => {
+        row.forEach((element, i) => {
           if (i != ilat || i != ilon) {
             props[this.options.titles[i]] = element
           }
         });
-        return pointFeature(lat,lng,propos);
+        return pointFeature(lat,lon,props);
       });
     }
     return json;
