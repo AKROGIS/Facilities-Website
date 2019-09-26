@@ -1,10 +1,10 @@
 var o = {
   options: {
-    firstLineTitles: true,
+    firstLineTitles: false,
     fieldSeparator: ',',
 	  latitudeTitle: 'lat',
-	  longitudeTitle: 'lon',
-    titles: ['lat', 'lng', 'popup'],
+	  longitudeTitle: 'long',
+    titles: ['Name', 'lat', 'long'],
   },
 
   initialize: function (csv, options) {
@@ -163,7 +163,7 @@ var o = {
 
 };
 //var text = 'City+Na.me,lat,lon\nLos Angeles,34°03′N,118°15′W\nNew York City,40°42′46″N,74°00′21″W\nParis,48°51′24″N,2°21′03″E'
-var text = 'City+Na.me,lat,lon\nLos Angeles,34.03,118.15\nNew York City,40.4246,74.0021\nParis,48.5124,2.2103'
+var text = '"City Na,me",lat,lon\nLos Angeles,34.03,118.15\nNew York City,40.4246,74.0021\nParis,48.5124,2.2103'
 var geoJson = o.addData(text);
 console.log(geoJson);
 geoJson['features'].forEach(ele => {
