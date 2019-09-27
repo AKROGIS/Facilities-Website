@@ -105,6 +105,27 @@ var dsv = function (delimiter) {
   }
 }
 
+function autoType(object) {
+  // https://github.com/d3/d3-dsv/issues/45
+  var fixtz = new Date("2019-01-01T00:00").getHours() || new Date("2019-07-01T00:00").getHours();
+
+  for (var key in object) {
+    var value = object[key].trim(), number, m;
+    if (!value) value = null;
+    else if (value === "true") value = true;
+    else if (value === "false") value = false;
+    else if (value === "NaN") value = NaN;
+    else if (!isNaN(number = +value)) value = number;
+    else if (m = value.match(/^([-+]\d{2})?\d{4}(-\d{2}(-\d{2})?)?(T\d{2}:\d{2}(:\d{2}(\.\d{3})?)?(Z|[-+]\d{2}:\d{2})?)?$/)) {
+      if (fixtz && !!m[4] && !m[7]) value = value.replace(/-/g, "/").replace(/T/, " ");
+      value = new Date(value);
+    }
+    else continue;
+    object[key] = value;
+  }
+  return object;
+}
+
 // Test 1
 /*
 var csv = dsv(',')
@@ -131,8 +152,8 @@ console.log(r2[1][1])
 // expect: 2
 */
 // Test 2
-var text = 'foo,bar\n1,2\na,"b,c"\nregan,"is\n""great""!"\n2019-10-01,12:23:45'
-console.log(dsv(',').parse(text))
+var text = 'foo,bar\n1,2\n3.14151926,-0.123\nab \u263A de,abc\ntrue,false\n,null\na,"b,c"\n"dsv","is\n""great""!"\n2019-10-01,12:23:45'
+console.log(dsv(',').parse(text, autoType))
 // expect: [ { foo: '1', bar: '2' }, { foo: 'a', bar: 'b,c' }, { foo: 'regan', bar: 'is "great"!' }, { foo: '2019-10-01', bar: '12:23:45' }, columns: [ 'foo', 'bar' ]]
 // Test 3
 /*
