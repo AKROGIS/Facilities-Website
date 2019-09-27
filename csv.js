@@ -1,20 +1,20 @@
 var o = {
   options: {
-    firstLineTitles: true,
+    hasHeader: true,
     fieldSeparator: ',',
     latitudeTitle: 'lat', // Case sensitive, no mangling or space removal
     longitudeTitle: 'lon', // ditto
-    titles: ['lat', 'lng', 'popup'] // ignored if firstLineTitles = true
+    newHeader: ['lat', 'lng', 'popup'] // ignored if hasHeader = true
   },
 
   addData: function (data) {
     if (typeof data === 'string') {
       var csv = this._dsv(this.options.fieldSeparator)
       var rows
-      if (this.options.firstLineTitles) {
+      if (this.options.hasHeader) {
         rows = csv.parse(data)
         // rows will be an array of objects
-        this.options.titles = rows.columns
+        this.options.newHeader = rows.columns
       } else {
         rows = csv.parseRows(data)
         // rows will be an array of arrays
@@ -39,7 +39,7 @@ var o = {
     var json = {
       type: 'FeatureCollection'
     }
-    if (this.options.firstLineTitles) {
+    if (this.options.hasHeader) {
       json.features = rows.map(element => {
         var lat = element[this.options.latitudeTitle]
         var lon = element[this.options.longitudeTitle]
@@ -50,8 +50,8 @@ var o = {
         return pointFeature(lat, lon, props)
       })
     } else {
-      var ilat = this.options.titles.indexOf(this.options.latitudeTitle)
-      var ilon = this.options.titles.indexOf(this.options.longitudeTitle)
+      var ilat = this.options.newHeader.indexOf(this.options.latitudeTitle)
+      var ilon = this.options.newHeader.indexOf(this.options.longitudeTitle)
       json.features = rows.map(row => {
         var lat = row[ilat]
         var lon = row[ilon]
@@ -59,7 +59,7 @@ var o = {
         var props = {}
         row.forEach((element, i) => {
           if (i !== ilat || i !== ilon) {
-            props[this.options.titles[i]] = element
+            props[this.options.newHeader[i]] = element
           }
         })
         return pointFeature(lat, lon, props)
