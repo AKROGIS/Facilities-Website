@@ -125,38 +125,3 @@ function autoType(object) {
   }
   return object;
 }
-
-// Test 1
-/*
-var csv = dsv(',')
-var text = 'foo,bar\n1,2'
-var r1 = csv.parse(text)
-console.log(r1)
-// expect: [ { foo: '1', bar: '2' }, columns: [ 'foo', 'bar' ] ]
-console.log(r1.columns)
-// expect: [ 'foo', 'bar' ]
-console.log(r1.length)
-// expect: 1
-console.log(r1[0].bar)
-// expect: 2
-var r2 = csv.parseRows(text)
-console.log(r2)
-// expect: [ [ 'foo', 'bar' ], [ '1', '2' ] ]
-console.log(r2.columns)
-// expect: undefined
-console.log(r2.length)
-// expect: 2
-console.log(r2[0].bar)
-// expect: undefined
-console.log(r2[1][1])
-// expect: 2
-*/
-// Test 2
-var text = 'foo,bar\n1,2\n3.14151926,-0.123\nab \u263A de,abc\ntrue,false\n,null\na,"b,c"\n"dsv","is\n""great""!"\n2019-10-01,12:23:45'
-console.log(dsv(',').parse(text, autoType))
-// expect: [ { foo: '1', bar: '2' }, { foo: 'a', bar: 'b,c' }, { foo: 'regan', bar: 'is "great"!' }, { foo: '2019-10-01', bar: '12:23:45' }, columns: [ 'foo', 'bar' ]]
-// Test 3
-/*
-var text = 'City+Na.me ,lat,lon\nLos Angeles,34°03′N,118°15′W\nNew York City,40°42′46″N,74°00′21″W\nParis,48°51′24″N,2°21′03″E'
-console.log(dsv(',').parse(text))
-*/
