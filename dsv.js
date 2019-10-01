@@ -105,37 +105,23 @@ var dsv = function (delimiter) {
   }
 }
 
-// Test 1
-/*
-var csv = dsv(',')
-var text = 'foo,bar\n1,2'
-var r1 = csv.parse(text)
-console.log(r1)
-// expect: [ { foo: '1', bar: '2' }, columns: [ 'foo', 'bar' ] ]
-console.log(r1.columns)
-// expect: [ 'foo', 'bar' ]
-console.log(r1.length)
-// expect: 1
-console.log(r1[0].bar)
-// expect: 2
-var r2 = csv.parseRows(text)
-console.log(r2)
-// expect: [ [ 'foo', 'bar' ], [ '1', '2' ] ]
-console.log(r2.columns)
-// expect: undefined
-console.log(r2.length)
-// expect: 2
-console.log(r2[0].bar)
-// expect: undefined
-console.log(r2[1][1])
-// expect: 2
-*/
-// Test 2
-var text = 'foo,bar\n1,2\na,"b,c"\nregan,"is\n""great""!"\n2019-10-01,12:23:45'
-console.log(dsv(',').parse(text))
-// expect: [ { foo: '1', bar: '2' }, { foo: 'a', bar: 'b,c' }, { foo: 'regan', bar: 'is "great"!' }, { foo: '2019-10-01', bar: '12:23:45' }, columns: [ 'foo', 'bar' ]]
-// Test 3
-/*
-var text = 'City+Na.me ,lat,lon\nLos Angeles,34°03′N,118°15′W\nNew York City,40°42′46″N,74°00′21″W\nParis,48°51′24″N,2°21′03″E'
-console.log(dsv(',').parse(text))
-*/
+function autoType(object) {
+  // https://github.com/d3/d3-dsv/issues/45
+  var fixtz = new Date("2019-01-01T00:00").getHours() || new Date("2019-07-01T00:00").getHours();
+
+  for (var key in object) {
+    var value = object[key].trim(), number, m;
+    if (!value) value = null;
+    else if (value === "true") value = true;
+    else if (value === "false") value = false;
+    else if (value === "NaN") value = NaN;
+    else if (!isNaN(number = +value)) value = number;
+    else if (m = value.match(/^([-+]\d{2})?\d{4}(-\d{2}(-\d{2})?)?(T\d{2}:\d{2}(:\d{2}(\.\d{3})?)?(Z|[-+]\d{2}:\d{2})?)?$/)) {
+      if (fixtz && !!m[4] && !m[7]) value = value.replace(/-/g, "/").replace(/T/, " ");
+      value = new Date(value);
+    }
+    else continue;
+    object[key] = value;
+  }
+  return object;
+}
