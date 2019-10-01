@@ -26,7 +26,6 @@
 	<script src="https://unpkg.com/leaflet-search@2.9.8/dist/leaflet-search.src.js" integrity="sha384-okQwpsfxJf2JKLbIR9gWFBAAsCxkV3ePEz0pX9DneoTPdtJHwivL9ZCNRfw59Oof" crossorigin=""></script>
 
 	<link rel="stylesheet" href="css/style2.css"/>
-	<script src="js/main.js"></script>
 </head>
 <body>
 
@@ -49,5 +48,13 @@
   
 <div id="map" class="map"></div>
 
+<script type='module'>
+	import FacilityMap from './js/main.js';
+	const myMap = new FacilityMap('map');
+	function find(str) { myMap.find.call(myMap, str) }; // for hyperlinks in popup
+	window.find = find;
+	myMap.configure();
+</script>
+	
 </body>
 </html>
