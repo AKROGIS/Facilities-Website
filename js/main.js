@@ -128,12 +128,41 @@ export default class FacilityMap {
         return '<a href="#" class="' + name + '">' + text + ' <b>' + type + '</b></a>'
       }
     }
+    function buildIcon(symbol) {
+      return L.icon({
+        iconUrl: symbol,
+        iconSize: [14,14],
+        iconAnchor: [7,22],
+        popupAnchor: [0,-15],
+        tooltipAnchor: [0,-15],
+        shadowUrl: 'images/marker-small.svg',
+        shadowSize: [24,39],
+        shadowAnchor: [12,27]
+      })
+    }
+    const roadIcon = buildIcon('images/car-s.svg')
+    const trailIcon = buildIcon('images/trail-s.svg')
+    const parkingIcon = buildIcon('images/parking-s.svg')
+    const bridgeIcon = buildIcon('images/bridge-s.svg')
+    const buildingIcon = buildIcon('images/ranger-s.svg')
+    const unknownIcon = buildIcon('?')
 
     const geoCsvOpts = {
       firstLineTitles: true,
       fieldSeparator: ',',
       latitudeTitle: 'Latitude',
       longitudeTitle: 'Longitude',
+      pointToLayer: function(geoJsonPoint, latlng) {
+        var icon = unknownIcon;
+        switch (geoJsonPoint.properties['Kind']) {
+          case 'Building' : icon = buildingIcon; break;
+          case 'Road' : icon = roadIcon; break;
+          case 'Parking' : icon = parkingIcon; break;
+          case 'Bridge' : icon = bridgeIcon; break;
+          case 'Trail' : icon = trailIcon; break;
+        }
+        return L.marker(latlng, {icon: icon})
+      },
       onEachFeature: function (feature, layer) {
         var popup = buildPopup(feature, this.photos[feature.properties.Photo_Id])
         layer.bindPopup(popup)
