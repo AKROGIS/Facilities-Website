@@ -55,8 +55,14 @@ export default class FacilityMap {
     })
     */
 
+    function has_key(obj,key) {
+      // returns true if obj has a owned property called key
+      // Guards against redefinition of hasOwnProperty, see https://eslint.org/docs/rules/guard-for-in
+      return Object.prototype.hasOwnProperty.call(obj, key)
+    }
+
     function buildPopup (feature, photos) {
-      const title = {}.hasOwnProperty.call(feature.properties, 'DM') ? 'Location' : 'Asset'
+      const title = has_key(feature.properties, 'DM') ? 'Location' : 'Asset'
       let popup =
         `<div class="title">${title} ${feature.properties.ID}</div>` +
         '<div class="content">' +
@@ -173,7 +179,7 @@ export default class FacilityMap {
       latitudeTitle: 'Latitude',
       longitudeTitle: 'Longitude',
       pointToLayer: function(geoJsonPoint, latlng) {
-        const asset = ! {}.hasOwnProperty.call(geoJsonPoint.properties, 'DM')
+        const asset = ! has_key(geoJsonPoint.properties, 'DM')
         var icon = unknownIcon;
         switch (geoJsonPoint.properties['Kind']) {
           case 'Building' : icon = asset ? buildingAssetIcon : buildingIcon; break;
