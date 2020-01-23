@@ -95,7 +95,7 @@ export default class FacilityMap {
     }
 
     const clusterOptions = {
-      maxClusterRadius: 60,
+      maxClusterRadius: 30,
       // showCoverageOnHover: false,
       polygonOptions: { color: '#7A904F' },
       iconCreateFunction: function (cluster) {
@@ -117,9 +117,8 @@ export default class FacilityMap {
     }
 
     const searchOptions = {
-      propertyName: 'ID',
+      propertyName: 'Index',
       zoom: 18,
-      textPlaceholder: 'FMSS ID',
       initial: false,
       hideMarkerOnCollapse: true,
       buildTip: function (text, val) {
@@ -164,6 +163,8 @@ export default class FacilityMap {
         return L.marker(latlng, {icon: icon})
       },
       onEachFeature: function (feature, layer) {
+        // Create a dynamic multi part search field
+        feature.properties.Index = feature.properties.ID + ' - ' + feature.properties.Desc
         var popup = buildPopup(feature, this.photos[feature.properties.Photo_Id])
         layer.bindPopup(popup)
         var tooltip = feature.properties.ID === 'N/A' ? feature.properties.Name : feature.properties.ID
