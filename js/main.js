@@ -6,6 +6,8 @@ export default class FacilityMap {
   constructor (mapDivId) {
     this.map = L.map(mapDivId).setView([62, -152], 5)
     this.photos = undefined
+    this.children_for = undefined
+    this.assets_for = undefined
     this.searchControl = undefined
   }
 
@@ -61,7 +63,37 @@ export default class FacilityMap {
       return Object.prototype.hasOwnProperty.call(obj, key)
     }
 
-    function buildPopup (feature, photos) {
+    function buildPopup (feature, photos, children, assets) {
+      function generic_row(data, title, title_plural) {
+        let row = ''
+        if (!Array.isArray(data)) { return row}
+        if (data.length === 0) { return row};
+        if (data.length === 1) {
+          var id = data[0].i;
+          var name = data[0].d;
+          if (data[0].c == 0) {
+            row = '<tr><td class="att_name">' + title + '</td><td>' + id + ' - ' + name + '</td></tr>'
+          } else {
+            row = '<tr><td class="att_name">' + title + '</td><td><a href="javascript:find(\'' + id + '\')">' + id + ' - ' + name + '</a></td></tr>'
+          }
+        } else {
+          row = '<tr><td class="att_name">' + title_plural + '</td><td><ul>'
+          data.forEach(element => {
+            var id = element.i;
+            var name = element.d;
+            var item;
+            if (element.c == 0) {
+              item = '<li>' + id + ' - ' + name + '</li>'
+            } else {
+              item = '<li><a href="javascript:find(\'' + id + '\')">' + id + ' - ' + name + '</a></li>'
+            }
+            row += item;
+          });
+          row += '</ul></td></tr>'
+        }
+        return row
+      }
+
       const title = has_key(feature.properties, 'DM') ? 'Location' : 'Asset'
       let popup =
         `<div class="title">${title} ${feature.properties.ID}</div>` +
@@ -76,7 +108,9 @@ export default class FacilityMap {
         `<tr><td class="att_name">Def. Maint</td><td>${feature.properties.DM}</td></tr>` +
         `<tr><td class="att_name">Age</td><td>${feature.properties.Age}</td></tr>` +
         `<tr><td class="att_name">Size</td><td>${feature.properties.Size}</td></tr>` +
-        `<tr><td class="att_name">Status</td><td>${feature.properties.Status}</td></tr>`
+        `<tr><td class="att_name">Status</td><td>${feature.properties.Status}</td></tr>` +
+        generic_row(children, 'Child', 'Children') +
+        generic_row(assets, 'Asset', 'Assets')
       } else {
         popup += `<tr><td class="att_name">ParkID</td><td>${feature.properties.Desc}</td></tr>`
       }
@@ -193,10 +227,12 @@ export default class FacilityMap {
       },
       onEachFeature: function (feature, layer) {
         // Create a dynamic multi part search field
-        feature.properties.Index = feature.properties.ID + ' - ' + feature.properties.Desc
-        var popup = buildPopup(feature, this.photos[feature.properties.Photo_Id])
-        layer.bindPopup(popup, {maxWidth:500})
-        var tooltip = feature.properties.ID === 'N/A' ? feature.properties.Name : feature.properties.ID
+        const id = feature.properties.ID
+        feature.properties.Index = id + ' - ' + feature.properties.Desc
+        var popup = buildPopup(feature, this.photos[feature.properties.Photo_Id], this.children_for[id], this.assets_for[id])
+        // TODO: Adjust width/height based on available screen size  ('90%' does not work)
+        layer.bindPopup(popup, {maxWidth:500, maxHeight:800})
+        var tooltip = id === 'N/A' ? feature.properties.Name : id
         layer.bindTooltip(tooltip, { sticky: true })
       }.bind(this)
     }
@@ -209,9 +245,13 @@ export default class FacilityMap {
     Promise.all([
       window.fetch('/fmss/photos.json').then(response => response.json()),
       window.fetch('data/facilities.csv').then(response => response.text()),
-      window.fetch('data/assets.csv').then(response => response.text())
-    ]).then(([photos, facilities, assets]) => {
+      window.fetch('data/assets.csv').then(response => response.text()),
+      window.fetch('data/children.json').then(response => response.json()),
+      window.fetch('data/assets.json').then(response => response.json())
+    ]).then(([photos, facilities, assets, children_for, assets_for]) => {
       this.photos = photos
+      this.children_for = children_for
+      this.assets_for = assets_for
       markers.addLayer(L.geoCsv(facilities, geoCsvOpts))
       markers.addLayer(L.geoCsv(assets, geoCsvOpts))
     })
