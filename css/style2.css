@@ -273,7 +273,7 @@ line-height: 40px;
 .map .leaflet-popup-content {
   font-size: 14px;
   margin: 15px;
-  width: auto !important;
+  /* width: auto !important; */
 }
   .map .leaflet-popup-scrolled .content, .map .content .leaflet-popup-scrolled audio, .map .content .leaflet-popup-scrolled iframe, .map .content .leaflet-popup-scrolled img, .map .content .leaflet-popup-scrolled video {
     margin-right: 15px;

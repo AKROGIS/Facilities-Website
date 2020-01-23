@@ -166,7 +166,7 @@ export default class FacilityMap {
         // Create a dynamic multi part search field
         feature.properties.Index = feature.properties.ID + ' - ' + feature.properties.Desc
         var popup = buildPopup(feature, this.photos[feature.properties.Photo_Id])
-        layer.bindPopup(popup)
+        layer.bindPopup(popup, {maxWidth:500})
         var tooltip = feature.properties.ID === 'N/A' ? feature.properties.Name : feature.properties.ID
         layer.bindTooltip(tooltip, { sticky: true })
       }.bind(this)
