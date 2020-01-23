@@ -30,7 +30,7 @@ td.att_name { font-weight: bold;
     overflow:hidden;
     border-bottom-color:rgb(56,73,32);
     border-bottom-style:solid;
-    border-bottom-width:5px;
+    border-bottom-width:4px;
 }
 
 #headerText{
@@ -87,7 +87,7 @@ td.att_name { font-weight: bold;
     top:45px;
     border:none;
     padding:0;
-    height:100%;
+    height:calc(100% - 45px);
     width:100%;
     overflow:hidden;
 }
