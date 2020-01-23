@@ -18,12 +18,14 @@ export default class FacilityMap {
   configure () {
     // Mapbox Streets
     L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
-      maxZoom: 18,
+      maxZoom: 20,
       attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
                   '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
                   'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
       id: 'mapbox.streets'
     }).addTo(this.map)
+
+    L.esri.basemapLayer('ImageryClarity', {minZoom: 15, maxZoom: 19, opacity: 0.8}).addTo(this.map)
 
     /*
     // Park Tiles 4 (retina display problem on Safari on MacOS)
@@ -36,7 +38,7 @@ export default class FacilityMap {
     }).addTo(this.map)
 
     // Esri World Imagery
-    // L.esri.basemapLayer('ImageryClarity').addTo(this.map)
+    L.esri.basemapLayer('ImageryClarity').addTo(this.map)
 
     // AKR GIS Facilities Map Service
     L.esri.dynamicMapLayer({
@@ -95,9 +97,9 @@ export default class FacilityMap {
     }
 
     const clusterOptions = {
-      maxClusterRadius: 30,
-      // showCoverageOnHover: false,
-      polygonOptions: { color: '#7A904F' },
+      maxClusterRadius: 20,
+      showCoverageOnHover: false,
+      // polygonOptions: { color: '#7A904F' },
       iconCreateFunction: function (cluster) {
         var childCount = cluster.getChildCount()
         var content = '<div><span>' + childCount + '</span></div>'
@@ -139,11 +141,30 @@ export default class FacilityMap {
         shadowAnchor: [12,27]
       })
     }
+    function buildAssetIcon(symbol) {
+      return L.icon({
+        iconUrl: symbol,
+        iconSize: [10,10],
+        iconAnchor: [4,16],
+        popupAnchor: [0,-11],
+        tooltipAnchor: [0,-11],
+        shadowUrl: 'images/marker-asset.svg',
+        shadowSize: [18,28],
+        shadowAnchor: [8,19]
+      })
+    }
     const roadIcon = buildIcon('images/car-s.svg')
     const trailIcon = buildIcon('images/trail-s.svg')
     const parkingIcon = buildIcon('images/parking-s.svg')
     const bridgeIcon = buildIcon('images/bridge-s.svg')
     const buildingIcon = buildIcon('images/ranger-s.svg')
+
+    const roadAssetIcon = buildAssetIcon('images/car-s.svg')
+    const trailAssetIcon = buildAssetIcon('images/trail-s.svg')
+    const parkingAssetIcon = buildAssetIcon('images/parking-s.svg')
+    const bridgeAssetIcon = buildAssetIcon('images/bridge-s.svg')
+    const buildingAssetIcon = buildAssetIcon('images/ranger-s.svg')
+
     const unknownIcon = buildIcon('?')
 
     const geoCsvOpts = {
@@ -152,14 +173,16 @@ export default class FacilityMap {
       latitudeTitle: 'Latitude',
       longitudeTitle: 'Longitude',
       pointToLayer: function(geoJsonPoint, latlng) {
+        const asset = ! {}.hasOwnProperty.call(geoJsonPoint.properties, 'DM')
         var icon = unknownIcon;
         switch (geoJsonPoint.properties['Kind']) {
-          case 'Building' : icon = buildingIcon; break;
-          case 'Road' : icon = roadIcon; break;
-          case 'Parking' : icon = parkingIcon; break;
-          case 'Bridge' : icon = bridgeIcon; break;
-          case 'Trail' : icon = trailIcon; break;
+          case 'Building' : icon = asset ? buildingAssetIcon : buildingIcon; break;
+          case 'Road' : icon = asset ? roadAssetIcon : roadIcon; break;
+          case 'Parking' : icon = asset ? parkingAssetIcon : parkingIcon; break;
+          case 'Bridge' : icon = asset ? bridgeAssetIcon : bridgeIcon; break;
+          case 'Trail' : icon = asset ? trailAssetIcon : trailIcon; break;
         }
+        if (asset) {icon.className = 'asset'}
         return L.marker(latlng, {icon: icon})
       },
       onEachFeature: function (feature, layer) {
