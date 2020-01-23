@@ -9,7 +9,15 @@
 -- Make sure we are using the DEFAULT version in SDE
 exec sde.set_default
 
+
+-------------------------
+--
+--   facilities.csv
+--
+-------------------------
+
 -- Facilities in GIS matching FMSS Location records
+
 SELECT
     -- GIS Attributes
     g.Kind,
@@ -202,6 +210,13 @@ WHERE
     f.[Type] = 'OPERATING'
 
 
+
+-------------------------
+--
+--   assets.csv
+--
+-------------------------
+
 -- Items in GIS matching FMSS Asset records
 
 SELECT
@@ -271,3 +286,27 @@ RIGHT JOIN
 ON
   g.FACASSETID = f.Asset
 
+
+
+-------------------------
+--
+--   children.csv
+--
+-------------------------
+SELECT  Parent, Location, Description, Asset_Code
+FROM FMSSExport
+WHERE Type <> 'SALVAGE'
+  AND Parent IS NOT NULL
+ORDER BY Parent, Location
+
+
+-------------------------
+--
+--   all_assets.csv
+--
+-------------------------
+SELECT Location, Asset, Description
+FROM FMSSExport_Asset
+WHERE [Description] NOT LIKE '%REMOVED%'
+  AND [Location] IS NOT NULL
+ORDER BY [Location]
