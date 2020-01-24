@@ -131,7 +131,7 @@ export default class FacilityMap {
         '<tr><td class="att_name">Parent</td><td>' +
         `<a href="javascript:find('${feature.properties.Parent}')">${feature.properties.Parent}</a>`
       if (photos) {
-        let photoSection = '</td></tr><ul class="clearfix">'
+        let photoSection = '</td></tr><ul id="photo-list" class="clearfix">'
         photos.forEach((name, i) => {
           const thumbUrl = '/fmss/photos/thumb/' + name
           const fullUrl = '/fmss/photos/web/' + name
@@ -140,12 +140,13 @@ export default class FacilityMap {
         })
         photoSection += '</ul>'
         if (photos.length > 1) {
-          photoSection += '<div style="float: right;"><button class="btn btn-circle disabled prev">&lt;</button><button class="btn btn-circle next">&gt;</button></div>'
+          photoSection += '<div style="float: right;"><button id="prev-photo" class="btn btn-circle disabled prev">&lt;</button><button id="next-photo" class="btn btn-circle next">&gt;</button></div>'
         }
         popup += photoSection
       }
-      popup +=
-        '</td></tr></table></div>`'
+      popup += '</td></tr></table></div>'
+      // I can't add event to the photo carousel buttons, because the doc fragment will not be added to the DOM until later by the framework
+      // I will set up listeners later
       return popup
     }
 
@@ -268,5 +269,59 @@ export default class FacilityMap {
       markers.addLayer(L.geoCsv(facilities, geoCsvOpts))
       markers.addLayer(L.geoCsv(assets, geoCsvOpts))
     })
+
+    function changeImage (direction) {
+      var ul = document.getElementById('photo-list');
+      var previous = document.getElementById('prev-photo');
+      var next = document.getElementById('next-photo');
+      var lis = ul.childNodes;
+      var maxImg = lis.length;
+      var curImg;
+      var j;
+      var li;
+
+      for (j = 0; j < lis.length; j++) {
+        li = lis[j];
+
+        if (li.style.display !== 'none') {
+          curImg = j;
+          break;
+        }
+      }
+
+      if ((curImg + direction) < maxImg && (curImg + direction) > -1) {
+        for (j = 0; j < lis.length; j++) {
+          li = lis[j];
+
+          if (j === (curImg + direction)) {
+            li.style.display = 'block';
+          } else {
+            li.style.display = 'none';
+          }
+        }
+      }
+
+      if ((curImg + direction) <= 0) {
+        L.DomUtil.addClass(previous, 'disabled');
+      } else {
+        L.DomUtil.removeClass(previous, 'disabled');
+      }
+
+      if ((curImg + direction + 1) >= maxImg) {
+        L.DomUtil.addClass(next, 'disabled');
+      } else {
+        L.DomUtil.removeClass(next, 'disabled');
+      }
+    }
+
+    document.addEventListener('click',function(e){
+      if(e.target && e.target.id== 'prev-photo'){
+        changeImage (-1);
+      }
+      if(e.target && e.target.id== 'next-photo'){
+        changeImage (1);
+      }
+    });
+
   }
 }

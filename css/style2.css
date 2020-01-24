@@ -489,3 +489,20 @@ line-height: 40px;
     display: none;
 }
 */
+
+.map .leaflet-popup-content button {
+  font-weight: bold;
+  color: black;
+}
+.map .leaflet-popup-content button.disabled {
+  font-weight: normal;
+  color: #c0c0c0;
+}
+/*
+.map .leaflet-popup-content button:hover {
+  background-color:  #fccaa9;
+}
+.map .leaflet-popup-content button.disabled:hover {
+  background-color: inherit;
+}
+*/
