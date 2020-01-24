@@ -193,9 +193,11 @@ line-height: 40px;
   overflow: auto;
   text-align: left;
 }
+/*
 .map .leaflet-popup-pane {
   pointer-events: none;
 }
+*/
 .map .leaflet-popup-tip-container {
   height: 25px;
   margin: -1px auto;
@@ -265,11 +267,13 @@ line-height: 40px;
   top: -10px;
   width: 21px;
 }
+/*
 .map .leaflet-container a.leaflet-popup-close-button:focus, .leaflet-container a.leaflet-popup-close-button:hover {
   background-color: #8f8f7d;
   color: #fff;
   text-decoration: none;
 }
+*/
 .map .leaflet-popup-content {
   font-size: 14px;
   margin: 15px;
