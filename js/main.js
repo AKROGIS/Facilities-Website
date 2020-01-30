@@ -266,8 +266,8 @@ export default class FacilityMap {
       this.photos = photos
       this.children_for = children_for
       this.assets_for = assets_for
-      markers.addLayer(L.geoCsv(facilities, geoCsvOpts))
-      markers.addLayer(L.geoCsv(assets, geoCsvOpts))
+      markers.addLayer(L.geoDSV(facilities, geoCsvOpts))
+      markers.addLayer(L.geoDSV(assets, geoCsvOpts))
     })
 
     function changeImage (direction) {
