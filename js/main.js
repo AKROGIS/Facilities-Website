@@ -30,28 +30,6 @@ export default class FacilityMap {
       maxZoom: 20
 		}).addTo(this.map)
 
-
-    // Esri World Imagery
-    L.esri.basemapLayer('ImageryClarity', {minZoom: 15, maxZoom: 19, opacity: 0.8}).addTo(this.map)
-
-    /*
-    // Original ParkTiles
-    L.tileLayer('https://a.tiles.mapbox.com/v4/nps.2yxv8n84/{z}/{x}/{y}@2x.png?access_token=pk.eyJ1IjoibnBzIiwiYSI6IkdfeS1OY1UifQ.K8Qn5ojTw4RV1GwBlsci-Q', {
-      attribution: "&copy; <a href='https://www.mapbox.com/about/maps/' target='_blank'>Mapbox</a> &copy; <a href='https://www.openstreetmap.org/copyright' target='_blank'>OpenStreetMap</a> contributors",
-      maxZoom: 20
-    }).addTo(this.map)
-
-		// Park Tiles 4
-		// Use either 256 or 512 (512 has text that is too small to read on MacBook)
-		// Use either @2x or ''; @2x is crisper on the MacBook
-		L.tileLayer('https://api.mapbox.com/styles/v1/nps/{style_id}/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoibnBzIiwiYSI6IkdfeS1OY1UifQ.K8Qn5ojTw4RV1GwBlsci-Q', {
-      attribution: "&copy; <a href='https://www.mapbox.com/about/maps/' target='_blank'>Mapbox</a> &copy; <a href='https://www.openstreetmap.org/copyright' target='_blank'>OpenStreetMap</a> contributors",
-			style_id: "cjt94v8pu23wh1fqug0cnviat",  //Park Tiles Standard
-			//style_id: "cjua0op0k4q301gpbb7o7wc6t",  //Park Tiles Light
-			//style_id: "cju8w7m1l50bu1frs10dajli6",  //Park Tiles Slate
-      maxZoom: 20
-		}).addTo(this.map)
-
     // Esri World Imagery
     L.esri.basemapLayer('ImageryClarity', {minZoom: 15, maxZoom: 19, opacity: 0.8}).addTo(this.map)
 
@@ -59,16 +37,7 @@ export default class FacilityMap {
     L.esri.dynamicMapLayer({
       url: 'https://akrgis.nps.gov/arcgis/rest/services/AKR_Apps/FMSS_web_service/MapServer',
       opacity: 1.0
-      // minZoom:8
-    }).addTo(this.map).bindPopup(function (err, featureCollection) {
-      if (err) {
-        return err.message
-      } else {
-        var count = featureCollection.features.length
-        return (count) ? count + ' features' : false
-      }
-    })
-    */
+    }).addTo(this.map)
 
     function has_key(obj,key) {
       // returns true if obj has a owned property called key
