@@ -1,44 +1,52 @@
 /*
+ * Leaflet Plugin to create a GeoDSV Layer - A GeoJSON point layer created from a file of
+ *   delimiter-separated values (DSV) with at least two columns for the coordinates of the point.
+ *
+ * It is assumed that the author of the map has control of the DSV file, therefore no attempt is
+ *    made to guess the names of the coordinate columns or sanitaize the values
+ * All non-coordinate columns are added to the point as properties using the column name as the key
+ * The DSV parser is RFC 4180 (https://tools.ietf.org/html/rfc4180) compliant
+ *
  * Adapted from code at
- * 1) https://github.com/joker-x/Leaflet.geoCSV by Iván Eixarch <ivan@sinanimodelucro.org>
- * 2) https://github.com/d3/d3-dsv/blob/master/src/dsv.js
+ *   1) https://github.com/joker-x/Leaflet.geoCSV by Iván Eixarch <ivan@sinanimodelucro.org>
+ *   2) https://github.com/d3/d3-dsv/blob/master/src/dsv.js
  */
 
 /* global L */
 
-L.GeoCSV = L.GeoJSON.extend({
+L.GeoDSV = L.GeoJSON.extend({
 
   options: {
-    firstLineTitles: true,
-    fieldSeparator: ',',
-    latitudeTitle: 'latitude', // Case sensitive, no mangling or space removal
-    longitudeTitle: 'longitude', // ditto
-    titles: ['lat', 'lng', 'popup'] // ignored if firstLineTitles = true
-  },
+    fieldSeparator: ',',   // Character that delimits values in a line
+    firstLineNames: true,  // Does the file have column names in the first line?
+    names: ['lat', 'lng', 'popup'] // Names of the columns in the DSV - ignored if firstLineNames = true
+    latName: 'latitude',   // Name of column to use for the point's lat(Y) value - verbatim, case sensitive
+    lngName: 'longitude',  // Name of column to use for the point's lng(X) value - verbatim, case sensitive
+  }
 
-  initialize: function (csv, options) {
+  initialize: function (dsv, options) {
     L.Util.setOptions(this, options)
-    L.GeoJSON.prototype.initialize.call(this, csv, options)
+    L.GeoJSON.prototype.initialize.call(this, dsv, options)
   },
 
   addData: function (data) {
     if (typeof data === 'string') {
-      var csv = this._dsv(this.options.fieldSeparator)
+      var dsv = this._dsv(this.options.fieldSeparator)
       var rows
-      if (this.options.firstLineTitles) {
-        rows = csv.parse(data)
+      if (this.options.firstLineNames) {
+        rows = dsv.parse(data)
         // rows will be an array of objects
-        this.options.titles = rows.columns
+        this.options.names = rows.columns
       } else {
         rows = csv.parseRows(data)
         // rows will be an array of arrays
       }
-      data = this._csv2json(rows)
+      data = this._dsv2json(rows)
     }
     return L.GeoJSON.prototype.addData.call(this, data)
   },
 
-  _csv2json: function (rows) {
+  _dsv2json: function (rows) {
     function pointFeature (lat, lon, props) {
       return {
         type: 'Feature',
@@ -52,19 +60,19 @@ L.GeoCSV = L.GeoJSON.extend({
     var json = {
       type: 'FeatureCollection'
     }
-    if (this.options.firstLineTitles) {
+    if (this.options.firstLineNames) {
       json.features = rows.map(element => {
-        var lat = element[this.options.latitudeTitle]
-        var lon = element[this.options.longitudeTitle]
+        var lat = element[this.options.latName]
+        var lon = element[this.options.lngName]
         // TODO return null if lat/lon is invalid
         var props = Object.assign({}, element)
-        delete props[this.options.latitudeTitle]
-        delete props[this.options.longitudeTitle]
+        delete props[this.options.latName]
+        delete props[this.options.lngName]
         return pointFeature(lat, lon, props)
       })
     } else {
-      var ilat = this.options.titles.indexOf(this.options.latitudeTitle)
-      var ilon = this.options.titles.indexOf(this.options.longitudeTitle)
+      var ilat = this.options.names.indexOf(this.options.latName)
+      var ilon = this.options.names.indexOf(this.options.lngName)
       json.features = rows.map(row => {
         var lat = row[ilat]
         var lon = row[ilon]
@@ -72,7 +80,7 @@ L.GeoCSV = L.GeoJSON.extend({
         var props = {}
         row.forEach((element, i) => {
           if (i !== ilat || i !== ilon) {
-            props[this.options.titles[i]] = element
+            props[this.options.names[i]] = element
           }
         })
         return pointFeature(lat, lon, props)
@@ -89,6 +97,8 @@ L.GeoCSV = L.GeoJSON.extend({
     var NEWLINE = 10
     var RETURN = 13
 
+    // Returns a function that will convert an array into a JSON object with
+    // the values in the columns array as keys
     function _objectConverter (columns) {
       /* eslint-disable no-new-func */
       return new Function('d', 'return {' + columns.map(function (name, i) {
@@ -97,6 +107,8 @@ L.GeoCSV = L.GeoJSON.extend({
       /* eslint-enable no-new-func */
     }
 
+    // Returns a function that will convert an array into whatever f produces.
+    // if f is omitted a JSON object is produced.
     function _customConverter (columns, f) {
       var object = _objectConverter(columns)
       return function (row, i) {
@@ -182,11 +194,24 @@ L.GeoCSV = L.GeoJSON.extend({
     return {
       parse: parse,
       parseRows: parseRows
+    // parse:
+    // Takes the DSV text and an optional function, f.
+    // It parses the text and returns an array of whatever f produces.
+    // f takes a default JSON object, row number, and array of
+    // column names and returns some new value. The default JSON for a row
+    // has each value in the row keyed with the column name.  If f is not
+    // provided the default JSON object is returned.
+    //
+    // parseRows:
+    // Takes the DSV text and an optional function, f.
+    // It parses the text and returns an array of whatever f produces.
+    // f takes the row as an array and the row number and returns some
+    // new value.  If f is not provided, an array of arrays is returned.
     }
   }
 
 })
 
-L.geoCsv = function (csvString, options) {
-  return new L.GeoCSV(csvString, options)
+L.geoDsv = function (dsvString, options) {
+  return new L.GeoDSV(dsvString, options)
 }
