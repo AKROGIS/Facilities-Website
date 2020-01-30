@@ -3,11 +3,11 @@ Facilities Web App - To Do List
 
 Pending Features
 ----------------
-* Popup Improvements
-  - Expandable list of child LOCATIONs;  Clickable if we have a marker.
-  - Expandable list of LOCATION's Assets;  Clickable if we have a marker.
-  - Add a 'More...' button to open table with additional attributes for LOCATION (Note: we do not import everything)
-  - Fix **Known Bugs** (see list below)
+* _Legend/Quick Start_ Button
+* _Improve me_ button (email GIS helpdesk)
+- Fix **Known Bugs** (see list below)
+* Improved Styling:
+  - Controls and popups should look more like npmap
 * Enhance search to deal with multiple solutions
   - Examples:
     - Roads and trails have at least two markers, and often more
@@ -19,18 +19,35 @@ Pending Features
     - expand filter list to show all options
       - How would these be distinguished if they only differ by location?
     - ???
-* _Improve me_ button (email GIS helpdesk)
+
+Potential Features
+------------------
 * _Zoom to previous extents_ button
-* _Legend/Quick Start_ Button
 * _Reports_ Button
   - Trail assets sorted by distance from trailhead with photos
   - LOCATIONs/Assets without a location
   - Differences between GIS and FMSS
   - ???
-* Search on more than ID #
-  - Description, Park Name/Number, ??
-* Style the Search button to match other buttons
-* Improve aesthetic, clarity, and intuitiveness of map symbology and markers
+* Search on more than ID and Description
+  - Add Map Label, Park Name/Number, ??
+* Popup Improvements
+  - Add a 'More...' button to open table with additional attributes
+    for LOCATION (Note: we do not import everything)
+
+
+Major Data Editing Tasks
+------------------------
+* Add 2019 Chilkoot Trail features
+* Add 2019 WRST Trail survey
+* Add Bartlet Cove assets
+* Add support for road side features
+* Add 2019 DENA Culvert survey
+* Populate missing map labels (Name in LOCATION popup) -- mostly buildings (Can grab from POI)
+* Support additional asset codes (e.g. maintained landscapes) from LOCATIONS
+  - Focus on those that are parents to existing items
+* Add building assets (when we have photos)
+* Fuel storage tanks?
+* General review and cleanup of misc issue
 
 
 Known Bugs
@@ -41,29 +58,8 @@ Known Bugs
   - if LOCATION.Yearblt is not always a 4 digit integer (less than current year).
     It could be 'Planned', or 'm/d/yr', or 'NA'.
     Change label to 'Year Built' and display as is when not a 4 digit integer.
-* Popups only work on first layer of an ESRI map service
-  - E.g. the facilities background layer only shows GIS information for trails (the top layer)
-* Tool tips tends to accumulate
-* Clicking on a marker does not find all features, only the "top" one
-  - Assets and LOCATIONs can overlap and hide one another (e.g. trail material is at the trail head)
 * Search widget does not always respond correctly when clicking on LOCATION/Asset links in popup.
 * Some of the watermarks need refreshing (see Kennecott bridge)
-
-
-Major Data Editing Tasks
-------------------------
-* Add 2019 Chilkoot Trail features
-* Add Bartlet Cove assets
-* Add 2019 WRST Trail survey
-* Add support for road side features
-* Add 2019 DENA Culvert survey
-* Populate missing map labels (Name in LOCATION popup) -- mostly buildings (Can grab from POI)
-* Support additional asset codes (e.g. maintained landscapes) from LOCATIONS
-  - Focus on those that are parents to existing items
-* Add feature at trail head for trails with a single surface material asset
-* Add building assets (when we have photos)
-* Fuel storage tanks?
-* General review and cleanup of misc issue
 
 
 Optional Enhancements

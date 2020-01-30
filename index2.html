@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NPS Facilities (Alaska)</title>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+
+  <!-- leaflet mapping library: https://leafletjs.com/plugins.html -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
+
+  <!-- leaflet plugin, esri basemap: http://esri.github.io/esri-leaflet -->
+	<script src="https://unpkg.com/esri-leaflet@2.3.0/dist/esri-leaflet.js" integrity="sha512-1tScwpjXwwnm6tTva0l0/ZgM3rYNbdyMj5q6RSQMbNX6EUMhYDE3pMRGZaT41zHEvLoWEK7qFEJmZDOoDMU7/Q==" crossorigin=""></script>    
+
+  <!-- leaflet plugin, CSV overlay  -->
+	<script src="lib/geocsv.js"></script>
+    
+	<!-- leaflet plugin, Marker Cluster: https://github.com/Leaflet/Leaflet.markercluster -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" integrity="sha384-lPzjPsFQL6te2x+VxmV6q1DpRxpRk0tmnl2cpwAO5y04ESyc752tnEWPKDfl1olr" crossorigin=""/>
+	<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js" integrity="sha384-RLIyj5q1b5XJTn0tqUhucRZe40nFTocRP91R/NkRJHwAe4XxnTV77FXy/vGLiec2" crossorigin=""></script>
+
+	<!-- leaflet plugin, Search: https://github.com/stefanocudini/leaflet-search -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet-search@2.9.8/dist/leaflet-search.min.css" integrity="sha384-cn4LaTgXX4XlCvFNa4aM+sHe5s2yUXbq5135nF+P/yvvFbaCn4xdyO7Gw3ISaqDo" crossorigin=""/>
+	<script src="https://unpkg.com/leaflet-search@2.9.8/dist/leaflet-search.src.js" integrity="sha384-okQwpsfxJf2JKLbIR9gWFBAAsCxkV3ePEz0pX9DneoTPdtJHwivL9ZCNRfw59Oof" crossorigin=""></script>
+
+	<link rel="stylesheet" href="css/style2.css"/>
+</head>
+<body>
+
+<div id="header">
+  <div id="headerText">
+    <h1 id="title">Alaska Facilities</h1>
+    <h2 id="subtitle">A tool for locating the maintained infrastructure in Alaska's National Parks and Preserves</h2>
+  </div>
+  <div id="logoArea">
+    <div id="organizationText">
+    Alaska Region GIS<br/>
+    National Park Service<br/>
+    U.S. Department of the Interior<br/>
+    </div>
+    <div id="logo">
+    <img src="images/ArrowheadNoBackground.png" height="100%" alt="National Park Service Arrowhead">
+    </div>
+  </div>
+</div>
+  
+<div id="map" class="map"></div>
+
+<script type='module'>
+	import FacilityMap from './js/main.js';
+	const myMap = new FacilityMap('map');
+	function find(str) { myMap.find.call(myMap, str) }; // for hyperlinks in popup
+	window.find = find;
+	myMap.configure();
+</script>
+	
+</body>
+</html>
