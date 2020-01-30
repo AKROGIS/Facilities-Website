@@ -12,11 +12,11 @@
 	<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
 
   <!-- leaflet plugin, esri basemap: http://esri.github.io/esri-leaflet -->
-	<script src="https://unpkg.com/esri-leaflet@2.3.0/dist/esri-leaflet.js" integrity="sha512-1tScwpjXwwnm6tTva0l0/ZgM3rYNbdyMj5q6RSQMbNX6EUMhYDE3pMRGZaT41zHEvLoWEK7qFEJmZDOoDMU7/Q==" crossorigin=""></script>    
+	<script src="https://unpkg.com/esri-leaflet@2.3.0/dist/esri-leaflet.js" integrity="sha512-1tScwpjXwwnm6tTva0l0/ZgM3rYNbdyMj5q6RSQMbNX6EUMhYDE3pMRGZaT41zHEvLoWEK7qFEJmZDOoDMU7/Q==" crossorigin=""></script>
 
-  <!-- leaflet plugin, CSV overlay  -->
-	<script src="lib/geocsv.js"></script>
-    
+  <!-- leaflet plugin, DSV overlay  -->
+	<script src="lib/geodsv.js"></script>
+
 	<!-- leaflet plugin, Marker Cluster: https://github.com/Leaflet/Leaflet.markercluster -->
 	<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" integrity="sha384-lPzjPsFQL6te2x+VxmV6q1DpRxpRk0tmnl2cpwAO5y04ESyc752tnEWPKDfl1olr" crossorigin=""/>
 	<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js" integrity="sha384-RLIyj5q1b5XJTn0tqUhucRZe40nFTocRP91R/NkRJHwAe4XxnTV77FXy/vGLiec2" crossorigin=""></script>
@@ -45,7 +45,7 @@
     </div>
   </div>
 </div>
-  
+
 <div id="map" class="map"></div>
 
 <script type='module'>
@@ -55,6 +55,6 @@
 	window.find = find;
 	myMap.configure();
 </script>
-	
+
 </body>
 </html>
