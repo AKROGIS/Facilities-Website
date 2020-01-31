@@ -99,9 +99,11 @@ export default class FacilityMap {
       } else {
         popup += `<tr><td class="att_name">ParkID</td><td>${feature.properties.Desc}</td></tr>`
       }
-      popup +=
+      if (feature.properties.Parent && feature.properties.Parent !== "N/A") {
+        popup +=
         '<tr><td class="att_name">Parent</td><td>' +
         `<a href="javascript:find('${feature.properties.Parent}')">${feature.properties.Parent}</a>`
+      }
       if (photos) {
         let photoSection = '</td></tr><ul id="photo-list" class="clearfix">'
         photos.forEach((name, i) => {
