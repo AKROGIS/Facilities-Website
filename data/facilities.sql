@@ -76,7 +76,7 @@ JOIN
           FROM
             akr_facility2.gis.TRAILS_LN_evw
           WHERE
-            FACLOCID IS NOT NULL AND ISBRIDGE = 'No'
+            FACLOCID IS NOT NULL AND ISBRIDGE = 'No' AND LINETYPE = 'Center line'
         UNION ALL
           SELECT
             FACLOCID, MAPLABEL,
@@ -84,7 +84,7 @@ JOIN
           FROM
             akr_facility2.gis.TRAILS_LN_evw
           WHERE
-            FACLOCID IS NOT NULL AND ISBRIDGE = 'No'
+            FACLOCID IS NOT NULL AND ISBRIDGE = 'No' AND LINETYPE = 'Center line'
         ) AS temp
       GROUP BY
         FACLOCID, MAPLABEL, Latitude, Longitude
@@ -98,7 +98,7 @@ JOIN
       FROM
         akr_facility2.gis.TRAILS_LN_evw
       WHERE
-        FACLOCID IS NOT NULL
+        FACLOCID IS NOT NULL AND LINETYPE = 'Center line'
       GROUP BY
         FACLOCID
     ) AS g2
@@ -122,7 +122,7 @@ JOIN
           FROM
             akr_facility2.gis.ROADS_LN_evw
           WHERE
-            FACLOCID IS NOT NULL AND ISBRIDGE = 'No'
+            FACLOCID IS NOT NULL AND ISBRIDGE = 'No' AND LINETYPE = 'Center line'
         UNION ALL
           SELECT
             FACLOCID, MAPLABEL,
@@ -130,7 +130,7 @@ JOIN
           FROM
             akr_facility2.gis.ROADS_LN_evw
           WHERE
-            FACLOCID IS NOT NULL AND ISBRIDGE = 'No'
+            FACLOCID IS NOT NULL AND ISBRIDGE = 'No' AND LINETYPE = 'Center line'
         ) AS temp
       GROUP BY
         FACLOCID, MAPLABEL, Latitude, Longitude
@@ -144,7 +144,7 @@ JOIN
       FROM
         akr_facility2.gis.ROADS_LN_evw
       WHERE
-        FACLOCID IS NOT NULL
+        FACLOCID IS NOT NULL AND LINETYPE = 'Center line'
       GROUP BY
         FACLOCID
     ) AS g2
@@ -290,7 +290,7 @@ ON
 
 -------------------------
 --
---   children.csv
+--   parents.csv
 --
 -------------------------
 SELECT  Parent, Location, Description, Asset_Code
