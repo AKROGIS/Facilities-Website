@@ -4,7 +4,6 @@ Facilities Web App - To Do List
 Pending Features
 ----------------
 * _Legend/Quick Start_ Button
-* _Improve me_ button (email GIS helpdesk)
 - Fix **Known Bugs** (see list below)
 * Improved Styling:
   - Controls and popups should look more like npmap
