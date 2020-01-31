@@ -57,7 +57,6 @@ Known Bugs
   - if LOCATION.Yearblt is not always a 4 digit integer (less than current year).
     It could be 'Planned', or 'm/d/yr', or 'NA'.
     Change label to 'Year Built' and display as is when not a 4 digit integer.
-* Search widget does not always respond correctly when clicking on LOCATION/Asset links in popup.
 * Some of the watermarks need refreshing (see Kennecott bridge)
 
 

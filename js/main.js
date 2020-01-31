@@ -13,8 +13,11 @@ export default class FacilityMap {
 
   find (text) {
     this.map.closePopup()
-    this.searchControl.searchText(text)
-    this.searchControl._handleKeypress({ keyCode: 13 })
+    var control = this.searchControl
+    control.searchText(text)
+    setTimeout(function() {
+      control._handleKeypress({ keyCode: 13 })
+    }, 500);
   }
 
   configure () {
