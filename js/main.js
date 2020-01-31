@@ -292,5 +292,41 @@ export default class FacilityMap {
       }
     });
 
+    var hash = new L.Hash(this.map)
+
+    L.Control.Improve = L.Control.extend({
+      onAdd: function(map) {
+          // See https://stackoverflow.com/questions/21625672/what-is-an-accessible-way-to-mark-up-buttons-whose-only-content-is-an-icon#
+          // for building accessible buttons
+          var btn = L.DomUtil.create('button');
+          btn.title = "Send Feedback"
+          btn.onclick = function() {
+            const to = "akro_gis_helpdesk@nps.gov"
+            const subject = encodeURIComponent("Suggestions for the Facilities Web Map")
+            const loc = document.location
+            const body = "Hello GIS Team,\n\nThe Alaska Facilities Web Map at " + document.location +
+                         " has the following issues:\n\n"
+            var url = "mailto:" + to + "?subject=" + subject + "&body="+ encodeURIComponent(body);
+            //alert(url)
+            window.open(url,'_blank');
+          }
+          var img = L.DomUtil.create('img');
+          img.src = 'images/feedback-24px.svg'
+          img.style.height = '18px'
+          img.alt = "Feedback"
+          btn.appendChild(img)
+          return btn;
+      },
+
+      onRemove: function(map) {
+          // Nothing to do here
+      }
+    });
+
+    L.control.improve = function(opts) {
+        return new L.Control.Improve(opts);
+    }
+
+    L.control.improve({ position: 'topleft' }).addTo(this.map);
   }
 }
