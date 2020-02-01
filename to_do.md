@@ -51,10 +51,6 @@ Major Data Editing Tasks
 
 Known Bugs
 ----------
-* Age in LOCATION popup is sometimes missing or negative
-  - if LOCATION.Yearblt is not always a 4 digit integer (less than current year).
-    It could be 'Planned', or 'm/d/yr', or 'NA'.
-    Change label to 'Year Built' and display as is when not a 4 digit integer.
 * Some of the watermarks need refreshing (see Kennecott bridge)
 
 

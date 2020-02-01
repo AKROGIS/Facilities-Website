@@ -27,7 +27,7 @@ SELECT
     -- FMSS Attributes
     COALESCE(FORMAT(TRY_CAST(f.CRV AS FLOAT), 'C', 'en-us'), 'Unknown') AS CRV,
     COALESCE(FORMAT(TRY_CAST(f.DM AS FLOAT), 'C', 'en-us'), 'Unknown') AS DM,
-    COALESCE(CONVERT(varchar, YEAR(GetDate()) - TRY_CONVERT(INT, f.YearBlt)) + ' yrs', 'Unknown') AS Age,
+    COALESCE(CONVERT(varchar, YEAR(GetDate()) - TRY_CONVERT(INT, f.YearBlt)) + ' yrs', YearBlt) AS Age,
     f.Description AS [Desc],
     COALESCE(COALESCE(f.PARKNAME, f.PARKNUMB), '')  AS [Park_Id],
     f.Qty + ' ' + f.UM + g.Size as Size,

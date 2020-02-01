@@ -93,8 +93,17 @@ export default class FacilityMap {
         popup +=
         `<tr><td class="att_name">Description</td><td>${feature.properties.Desc}</td></tr>` +
         `<tr><td class="att_name">Value</td><td>${feature.properties.CRV}</td></tr>` +
-        `<tr><td class="att_name">Def. Maint</td><td>${feature.properties.DM}</td></tr>` +
-        `<tr><td class="att_name">Age</td><td>${feature.properties.Age}</td></tr>` +
+        `<tr><td class="att_name">Def. Maint</td><td>${feature.properties.DM}</td></tr>`
+        if (feature.properties.Age.endsWith(' yrs')) {
+          popup +=
+          `<tr><td class="att_name">Age</td><td>${feature.properties.Age}</td></tr>`
+        } else {
+          if (feature.properties.Age !== 'N/A') {
+            popup +=
+            `<tr><td class="att_name">Built In</td><td>${feature.properties.Age}</td></tr>`
+          }
+        }
+        popup += 
         `<tr><td class="att_name">Size</td><td>${feature.properties.Size}</td></tr>` +
         `<tr><td class="att_name">Status</td><td>${feature.properties.Status}</td></tr>` +
         generic_row(children, 'Child', 'Children') +
