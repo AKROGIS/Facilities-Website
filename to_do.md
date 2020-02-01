@@ -51,8 +51,6 @@ Major Data Editing Tasks
 
 Known Bugs
 ----------
-* Park ID in LOCATION popup seems to be missing information
-  - Include both LOCATION attributes for Name **and** Number
 * Age in LOCATION popup is sometimes missing or negative
   - if LOCATION.Yearblt is not always a 4 digit integer (less than current year).
     It could be 'Planned', or 'm/d/yr', or 'NA'.

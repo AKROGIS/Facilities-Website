@@ -86,8 +86,11 @@ export default class FacilityMap {
         `<div class="description"><p>${feature.properties.Name}</p>` +
         '<table>'
       if (title === 'Location') {
+        if (feature.properties.Park_Id) {
+          popup += 
+          `<tr><td class="att_name">ParkID</td><td>${feature.properties.Park_Id}</td></tr>`
+        }
         popup +=
-        `<tr><td class="att_name">ParkID</td><td>${feature.properties.Park_Id}</td></tr>` +
         `<tr><td class="att_name">Description</td><td>${feature.properties.Desc}</td></tr>` +
         `<tr><td class="att_name">Value</td><td>${feature.properties.CRV}</td></tr>` +
         `<tr><td class="att_name">Def. Maint</td><td>${feature.properties.DM}</td></tr>` +
