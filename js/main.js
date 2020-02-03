@@ -9,7 +9,24 @@ export default class FacilityMap {
     this.children_for = undefined
     this.assets_for = undefined
     this.searchControl = undefined
+    // Event handlers typically have the this set to the target, I want this to be the class instance
+    this.handlePopupClick = this.handlePopupClick.bind(this);
   }
+
+  handlePopupClick (e) {
+    // Photo carousel next/previous buttons
+    if(e.target && e.target.id== 'prev-photo'){
+      this.changeImage (-1);
+    }
+    if(e.target && e.target.id== 'next-photo'){
+      this.changeImage (1);
+    }
+    // Hyperlinks to other facilities/assets;
+    // These will have a href ='#' and a data-id attribute to search for
+    if(e.target && e.target.dataset.id){
+      this.find (e.target.dataset.id);
+    }
+  };
 
   find (text) {
     this.map.closePopup()
@@ -18,6 +35,50 @@ export default class FacilityMap {
     setTimeout(function() {
       control._handleKeypress({ keyCode: 13 })
     }, 500);
+  }
+
+  changeImage (direction) {
+    var ul = document.getElementById('photo-list');
+    var previous = document.getElementById('prev-photo');
+    var next = document.getElementById('next-photo');
+    var lis = ul.childNodes;
+    var maxImg = lis.length;
+    var curImg;
+    var j;
+    var li;
+
+    for (j = 0; j < lis.length; j++) {
+      li = lis[j];
+
+      if (li.style.display !== 'none') {
+        curImg = j;
+        break;
+      }
+    }
+
+    if ((curImg + direction) < maxImg && (curImg + direction) > -1) {
+      for (j = 0; j < lis.length; j++) {
+        li = lis[j];
+
+        if (j === (curImg + direction)) {
+          li.style.display = 'block';
+        } else {
+          li.style.display = 'none';
+        }
+      }
+    }
+
+    if ((curImg + direction) <= 0) {
+      L.DomUtil.addClass(previous, 'disabled');
+    } else {
+      L.DomUtil.removeClass(previous, 'disabled');
+    }
+
+    if ((curImg + direction + 1) >= maxImg) {
+      L.DomUtil.addClass(next, 'disabled');
+    } else {
+      L.DomUtil.removeClass(next, 'disabled');
+    }
   }
 
   configure () {
@@ -59,7 +120,7 @@ export default class FacilityMap {
           if (data[0].c == 0) {
             row = '<tr><td class="att_name">' + title + '</td><td>' + id + ' - ' + name + '</td></tr>'
           } else {
-            row = '<tr><td class="att_name">' + title + '</td><td><a href="javascript:find(\'' + id + '\')">' + id + ' - ' + name + '</a></td></tr>'
+            row = '<tr><td class="att_name">' + title + '</td><td><a data-id="' + id + '" href="#">' + id + ' - ' + name + '</a></td></tr>'
           }
         } else {
           row = '<tr><td class="att_name">' + title_plural + '</td><td><ul>'
@@ -70,7 +131,7 @@ export default class FacilityMap {
             if (element.c == 0) {
               item = '<li>' + id + ' - ' + name + '</li>'
             } else {
-              item = '<li><a href="javascript:find(\'' + id + '\')">' + id + ' - ' + name + '</a></li>'
+              item = '<li><a data-id="' + id + '" href="#">' + id + ' - ' + name + '</a></li>'
             }
             row += item;
           });
@@ -87,7 +148,7 @@ export default class FacilityMap {
         '<table>'
       if (title === 'Location') {
         if (feature.properties.Park_Id) {
-          popup += 
+          popup +=
           `<tr><td class="att_name">ParkID</td><td>${feature.properties.Park_Id}</td></tr>`
         }
         popup +=
@@ -103,7 +164,7 @@ export default class FacilityMap {
             `<tr><td class="att_name">Built In</td><td>${feature.properties.Age}</td></tr>`
           }
         }
-        popup += 
+        popup +=
         `<tr><td class="att_name">Size</td><td>${feature.properties.Size}</td></tr>` +
         `<tr><td class="att_name">Status</td><td>${feature.properties.Status}</td></tr>` +
         generic_row(children, 'Child', 'Children') +
@@ -114,7 +175,7 @@ export default class FacilityMap {
       if (feature.properties.Parent && feature.properties.Parent !== "N/A") {
         popup +=
         '<tr><td class="att_name">Parent</td><td>' +
-        `<a href="javascript:find('${feature.properties.Parent}')">${feature.properties.Parent}</a>`
+        `<a data-id="${feature.properties.Parent}" href="#">${feature.properties.Parent}</a>`
       }
       if (photos) {
         let photoSection = '</td></tr><ul id="photo-list" class="clearfix">'
@@ -256,59 +317,12 @@ export default class FacilityMap {
       markers.addLayer(L.geoDSV(assets, geoCsvOpts))
     })
 
-    function changeImage (direction) {
-      var ul = document.getElementById('photo-list');
-      var previous = document.getElementById('prev-photo');
-      var next = document.getElementById('next-photo');
-      var lis = ul.childNodes;
-      var maxImg = lis.length;
-      var curImg;
-      var j;
-      var li;
+    // Handle events in the popup.
+    // The popup content is added to the DOM after I define it, so I cannot add
+    // event listeners to the HTML in the popup when I define the popup
+    document.querySelector('.leaflet-popup-pane').addEventListener('click', this.handlePopupClick);
 
-      for (j = 0; j < lis.length; j++) {
-        li = lis[j];
-
-        if (li.style.display !== 'none') {
-          curImg = j;
-          break;
-        }
-      }
-
-      if ((curImg + direction) < maxImg && (curImg + direction) > -1) {
-        for (j = 0; j < lis.length; j++) {
-          li = lis[j];
-
-          if (j === (curImg + direction)) {
-            li.style.display = 'block';
-          } else {
-            li.style.display = 'none';
-          }
-        }
-      }
-
-      if ((curImg + direction) <= 0) {
-        L.DomUtil.addClass(previous, 'disabled');
-      } else {
-        L.DomUtil.removeClass(previous, 'disabled');
-      }
-
-      if ((curImg + direction + 1) >= maxImg) {
-        L.DomUtil.addClass(next, 'disabled');
-      } else {
-        L.DomUtil.removeClass(next, 'disabled');
-      }
-    }
-
-    document.addEventListener('click',function(e){
-      if(e.target && e.target.id== 'prev-photo'){
-        changeImage (-1);
-      }
-      if(e.target && e.target.id== 'next-photo'){
-        changeImage (1);
-      }
-    });
-
+    // Add the map locatio (zoom/lat/lng) to the documents URL
     var hash = new L.Hash(this.map)
 
     L.Control.Improve = L.Control.extend({

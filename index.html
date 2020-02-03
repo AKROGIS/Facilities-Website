@@ -52,10 +52,7 @@
 
 <script type='module'>
 	import FacilityMap from './js/main.js';
-	const myMap = new FacilityMap('map');
-	function find(str) { myMap.find.call(myMap, str) }; // for hyperlinks in popup
-	window.find = find;
-	myMap.configure();
+	new FacilityMap('map').configure();
 </script>
 
 </body>
