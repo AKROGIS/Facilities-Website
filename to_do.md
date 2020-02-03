@@ -52,6 +52,8 @@ Major Data Editing Tasks
 Known Bugs
 ----------
 * Some of the watermarks need refreshing (see Kennecott bridge)
+* From 39547 clicking on child 90863 does not work because 90863 is also part of asset 1490863
+
 
 
 Optional Enhancements
