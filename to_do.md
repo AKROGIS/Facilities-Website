@@ -52,6 +52,10 @@ Major Data Editing Tasks
 Known Bugs
 ----------
 * Some of the watermarks need refreshing (see Kennecott bridge)
+* searching for an ID that is part of another longer ID will not work
+* The parent ID in the asset popup should only be a link if we have a marker
+  currently we are checking the parent, but some locations with assets are
+  not parents (ie they have assets, but no children)
 
 
 Optional Enhancements

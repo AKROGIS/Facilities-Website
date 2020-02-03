@@ -140,16 +140,41 @@ export default class FacilityMap {
         return row
       }
 
-      const title = has_key(feature.properties, 'DM') ? 'Location' : 'Asset'
-      let popup =
-        `<div class="title">${title} ${feature.properties.ID}</div>` +
-        '<div class="content">' +
-        `<div class="description"><p>${feature.properties.Name}</p>` +
-        '<table>'
-      if (title === 'Location') {
+      const title = has_key(feature.properties, 'DM') ? 'Location #' : 'Asset ID'
+      const hasName = feature.properties.Name ? true : false
+      let popup = '<div class="title">'
+      if (hasName) {
+        popup += `${feature.properties.Name}</div>`
+      } else {
+        popup += `${title} ${feature.properties.ID}</div>`
+      }
+      popup +='<div class="content"><div class="description"><table>'
+      if (photos) {
+        const photoTitle = photos.length === 1 ? 'Photo' : 'Photos'
+        let photoSection = `<tr><td class="att_name">${photoTitle}</td><td><ul id="photo-list" class="clearfix">`
+        photos.forEach((name, i) => {
+          const thumbUrl = '/fmss/photos/thumb/' + name
+          const fullUrl = '/fmss/photos/web/' + name
+          const style = i === 0 ? 'block' : 'none'
+          photoSection += `<li style="display:${style};"><a href="${fullUrl}" target="_blank"><img height="150px" width="200px" src="${thumbUrl}"></a></li>`
+        })
+        photoSection += '</ul>'
+        if (photos.length > 1) {
+          photoSection += '<div style="float: right;"><button id="prev-photo" class="btn btn-circle disabled prev">&lt;</button><button id="next-photo" class="btn btn-circle next">&gt;</button></div>'
+        }
+        photoSection += '</td></tr>'
+        popup += photoSection
+      }
+      if (hasName) {
+        if (feature.properties.ID && feature.properties.ID !== "N/A" && feature.properties.ID !== "NULL") {
+          popup +=
+          `<tr><td class="att_name">${title}</td><td>${feature.properties.ID}</td></tr>`
+        }
+      }
+      if (title === 'Location #') {
         if (feature.properties.Park_Id) {
           popup +=
-          `<tr><td class="att_name">ParkID</td><td>${feature.properties.Park_Id}</td></tr>`
+          `<tr><td class="att_name">Park ID</td><td>${feature.properties.Park_Id}</td></tr>`
         }
         popup +=
         `<tr><td class="att_name">Description</td><td>${feature.properties.Desc}</td></tr>` +
@@ -170,9 +195,9 @@ export default class FacilityMap {
         generic_row(children, 'Child', 'Children') +
         generic_row(assets, 'Asset', 'Assets')
       } else {
-        popup += `<tr><td class="att_name">ParkID</td><td>${feature.properties.Desc}</td></tr>`
+        popup += `<tr><td class="att_name">Description</td><td>${feature.properties.Desc}</td></tr>`
       }
-      if (feature.properties.Parent && feature.properties.Parent !== "N/A") {
+      if (feature.properties.Parent && feature.properties.Parent !== "N/A" && feature.properties.Parent !== "NULL") {
         popup += '<tr><td class="att_name">Parent</td><td>'
         if (hasParent) {
           popup +=
@@ -180,21 +205,6 @@ export default class FacilityMap {
         } else {
           popup += `${feature.properties.Parent}</td></tr>`  
         }
-      }
-      if (photos) {
-        let photoSection = '<tr><td><ul id="photo-list" class="clearfix">'
-        photos.forEach((name, i) => {
-          const thumbUrl = '/fmss/photos/thumb/' + name
-          const fullUrl = '/fmss/photos/web/' + name
-          const style = i === 0 ? 'block' : 'none'
-          photoSection += `<li style="display:${style};"><a href="${fullUrl}" target="_blank"><img height="150px" width="200px" src="${thumbUrl}"></a></li>`
-        })
-        photoSection += '</ul>'
-        if (photos.length > 1) {
-          photoSection += '<div style="float: right;"><button id="prev-photo" class="btn btn-circle disabled prev">&lt;</button><button id="next-photo" class="btn btn-circle next">&gt;</button></div>'
-        }
-        photoSection += '</td></tr>'
-        popup += photoSection
       }
       popup += '</table></div>'
       // I can't add event to the photo carousel buttons, because the doc fragment will not be added to the DOM until later by the framework
@@ -295,6 +305,7 @@ export default class FacilityMap {
         // Create a dynamic multi part search field
         const id = feature.properties.ID
         feature.properties.Index = id + ' - ' + feature.properties.Desc
+        //FIXME: The next line is broken.  Need to check the feature list
         const hasParent = feature.properties.Parent in this.children_for
         var popup = buildPopup(feature, this.photos[feature.properties.Photo_Id], this.children_for[id], this.assets_for[id], hasParent)
         // TODO: Adjust width/height based on available screen size  ('90%' does not work)
