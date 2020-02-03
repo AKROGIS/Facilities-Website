@@ -109,7 +109,7 @@ export default class FacilityMap {
       return Object.prototype.hasOwnProperty.call(obj, key)
     }
 
-    function buildPopup (feature, photos, children, assets) {
+    function buildPopup (feature, photos, children, assets, hasParent) {
       function generic_row(data, title, title_plural) {
         let row = ''
         if (!Array.isArray(data)) { return row}
@@ -173,12 +173,16 @@ export default class FacilityMap {
         popup += `<tr><td class="att_name">ParkID</td><td>${feature.properties.Desc}</td></tr>`
       }
       if (feature.properties.Parent && feature.properties.Parent !== "N/A") {
-        popup +=
-        '<tr><td class="att_name">Parent</td><td>' +
-        `<a data-id="${feature.properties.Parent}" href="#">${feature.properties.Parent}</a>`
+        popup += '<tr><td class="att_name">Parent</td><td>'
+        if (hasParent) {
+          popup +=
+          `<a data-id="${feature.properties.Parent}" href="#">${feature.properties.Parent}</a></td></tr>`  
+        } else {
+          popup += `${feature.properties.Parent}</td></tr>`  
+        }
       }
       if (photos) {
-        let photoSection = '</td></tr><ul id="photo-list" class="clearfix">'
+        let photoSection = '<tr><td><ul id="photo-list" class="clearfix">'
         photos.forEach((name, i) => {
           const thumbUrl = '/fmss/photos/thumb/' + name
           const fullUrl = '/fmss/photos/web/' + name
@@ -189,9 +193,10 @@ export default class FacilityMap {
         if (photos.length > 1) {
           photoSection += '<div style="float: right;"><button id="prev-photo" class="btn btn-circle disabled prev">&lt;</button><button id="next-photo" class="btn btn-circle next">&gt;</button></div>'
         }
+        photoSection += '</td></tr>'
         popup += photoSection
       }
-      popup += '</td></tr></table></div>'
+      popup += '</table></div>'
       // I can't add event to the photo carousel buttons, because the doc fragment will not be added to the DOM until later by the framework
       // I will set up listeners later
       return popup
@@ -290,7 +295,8 @@ export default class FacilityMap {
         // Create a dynamic multi part search field
         const id = feature.properties.ID
         feature.properties.Index = id + ' - ' + feature.properties.Desc
-        var popup = buildPopup(feature, this.photos[feature.properties.Photo_Id], this.children_for[id], this.assets_for[id])
+        const hasParent = feature.properties.Parent in this.children_for
+        var popup = buildPopup(feature, this.photos[feature.properties.Photo_Id], this.children_for[id], this.assets_for[id], hasParent)
         // TODO: Adjust width/height based on available screen size  ('90%' does not work)
         layer.bindPopup(popup, {maxWidth:500, maxHeight:800})
         var tooltip = id === 'N/A' ? feature.properties.Name : id
