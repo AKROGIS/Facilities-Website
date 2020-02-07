@@ -233,7 +233,26 @@ FROM
   akr_facility2.dbo.FMSSExport_Asset AS f
 RIGHT JOIN
   (
-      SELECT
+      SELECT DISTINCT
+        -- road features
+        'Road' AS Kind,
+        f.FACASSETID,
+        COALESCE(p.FACLOCID, COALESCE(p.FACASSETID, COALESCE(p.FEATUREID, p.GEOMETRYID))) AS Photo_Id,
+        CASE WHEN f.RDFEATTYPE = 'Other' THEN f.RDFEATTYPEOTHER ELSE f.RDFEATTYPE END + 
+          CASE WHEN f.RDFEATSUBTYPE is NULL THEN '' ELSE ', ' + f.RDFEATSUBTYPE END AS [Name],
+        f.Shape.STY AS Latitude, f.Shape.STX AS Longitude
+      FROM
+        akr_facility2.gis.ROADS_FEATURE_PT_evw AS f
+      JOIN
+        akr_facility2.gis.AKR_ATTACH_evw AS p
+      ON
+        -- FIXME Breaks if a ATTACH has more than one foreign key (i.e. a photo of more than one object)
+        f.GEOMETRYID = p.GEOMETRYID OR f.FEATUREID = p.FEATUREID 
+        --f.FACLOCID = p.FACLOCID OR f.FACASSETID = p.FACASSETID OR f.FEATUREID = p.FEATUREID OR f.GEOMETRYID = p.GEOMETRYID
+      WHERE
+        f.FACASSETID IS NOT NULL OR p.ATCHLINK IS NOT NULL
+    UNION ALL
+      SELECT DISTINCT
         -- trail features
         'Trail' AS Kind,
         f.FACASSETID,
@@ -253,7 +272,7 @@ RIGHT JOIN
         f.FACASSETID IS NOT NULL OR p.ATCHLINK IS NOT NULL
     UNION ALL
       -- trail attributes (surface material, etc)
-      SELECT
+      SELECT DISTINCT
         'Trail' AS Kind,
         a.FACASSETID,
         COALESCE(p.FACLOCID, COALESCE(p.FACASSETID, COALESCE(p.FEATUREID, p.GEOMETRYID))) AS Photo_Id,
@@ -272,7 +291,7 @@ RIGHT JOIN
         a.FACASSETID IS NOT NULL OR p.ATCHLINK IS NOT NULL
     UNION ALL
       -- Buildings (typically out-buildings that are grouped with a main structure)
-      SELECT
+      SELECT DISTINCT
         'Building' AS Kind,
         FACASSETID,
         FACASSETID AS Photo_Id,
