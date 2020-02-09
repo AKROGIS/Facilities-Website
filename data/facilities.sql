@@ -228,18 +228,39 @@ SELECT
   g.Latitude, g.Longitude,
   -- FMSS
   f.Location AS Parent,  
-  COALESCE(f.[Description], 'Not an FMSS Asset') AS [Desc]
+  COALESCE(f.[Description], COALESCE(g.[Desc], 'Not an FMSS Asset')) AS [Desc]
 FROM
   akr_facility2.dbo.FMSSExport_Asset AS f
 RIGHT JOIN
   (
-      SELECT
+      SELECT DISTINCT
+        -- road features
+        'Road' AS Kind,
+        f.FACASSETID,
+        COALESCE(p.FACLOCID, COALESCE(p.FACASSETID, COALESCE(p.FEATUREID, p.GEOMETRYID))) AS Photo_Id,
+        CASE WHEN f.RDFEATTYPE = 'Other' THEN f.RDFEATTYPEOTHER ELSE f.RDFEATTYPE END + 
+          CASE WHEN f.RDFEATSUBTYPE is NULL THEN '' ELSE ', ' + f.RDFEATSUBTYPE END AS [Name],
+        f.RDFEATDESC as [Desc],
+        f.Shape.STY AS Latitude, f.Shape.STX AS Longitude
+      FROM
+        akr_facility2.gis.ROADS_FEATURE_PT_evw AS f
+      JOIN
+        akr_facility2.gis.AKR_ATTACH_evw AS p
+      ON
+        -- FIXME Breaks if a ATTACH has more than one foreign key (i.e. a photo of more than one object)
+        f.GEOMETRYID = p.GEOMETRYID OR f.FEATUREID = p.FEATUREID 
+        --f.FACLOCID = p.FACLOCID OR f.FACASSETID = p.FACASSETID OR f.FEATUREID = p.FEATUREID OR f.GEOMETRYID = p.GEOMETRYID
+      WHERE
+        f.FACASSETID IS NOT NULL OR p.ATCHLINK IS NOT NULL
+    UNION ALL
+      SELECT DISTINCT
         -- trail features
         'Trail' AS Kind,
         f.FACASSETID,
         COALESCE(p.FACLOCID, COALESCE(p.FACASSETID, COALESCE(p.FEATUREID, p.GEOMETRYID))) AS Photo_Id,
         CASE WHEN f.TRLFEATTYPE = 'Other' THEN f.TRLFEATTYPEOTHER ELSE f.TRLFEATTYPE END + 
           CASE WHEN f.TRLFEATSUBTYPE is NULL THEN '' ELSE ', ' + f.TRLFEATSUBTYPE END AS [Name],
+        f.TRLFEATDESC as [Desc],
         f.Shape.STY AS Latitude, f.Shape.STX AS Longitude
       FROM
         akr_facility2.gis.TRAILS_FEATURE_PT_evw AS f
@@ -253,12 +274,13 @@ RIGHT JOIN
         f.FACASSETID IS NOT NULL OR p.ATCHLINK IS NOT NULL
     UNION ALL
       -- trail attributes (surface material, etc)
-      SELECT
+      SELECT DISTINCT
         'Trail' AS Kind,
         a.FACASSETID,
         COALESCE(p.FACLOCID, COALESCE(p.FACASSETID, COALESCE(p.FEATUREID, p.GEOMETRYID))) AS Photo_Id,
         CASE WHEN a.TRLATTRTYPE = 'Other' THEN a.TRLATTRTYPEOTHER ELSE a.TRLATTRTYPE END + 
           CASE WHEN a.TRLATTRVALUE is NULL THEN '' ELSE ', ' + a.TRLATTRVALUE END AS [Name],
+        a.TRLATTRDESC as [Desc],
         a.Shape.STY AS Latitude, a.Shape.STX AS Longitude
       FROM
         akr_facility2.gis.TRAILS_ATTRIBUTE_PT_evw AS a
@@ -272,11 +294,12 @@ RIGHT JOIN
         a.FACASSETID IS NOT NULL OR p.ATCHLINK IS NOT NULL
     UNION ALL
       -- Buildings (typically out-buildings that are grouped with a main structure)
-      SELECT
+      SELECT DISTINCT
         'Building' AS Kind,
         FACASSETID,
         FACASSETID AS Photo_Id,
         MAPLABEL AS [Name],
+        BLDGTYPE as [Desc],
         Shape.STY AS Latitude, Shape.STX AS Longitude
       FROM
         akr_facility2.gis.AKR_BLDG_CENTER_PT_evw

@@ -53,7 +53,11 @@ Known Bugs
 ----------
 * Some of the watermarks need refreshing (see Kennecott bridge)
 * From 39547 clicking on child 90863 does not work because 90863 is also part of asset 1490863
-
+* Searching for an ID (90863) that is part of another longer ID (1490863) will not work
+  - Goto feature 39547, thnk try linking to child 90863
+* The parent ID in the asset popup should only be a link if we have a marker
+  currently we are checking the parent, but some locations with assets are
+  not parents (ie they have assets, but no children)
 
 
 Optional Enhancements
