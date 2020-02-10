@@ -32,6 +32,7 @@ Potential Features
 * Popup Improvements
   - Add a 'More...' button to open table with additional attributes
     for LOCATION (Note: we do not import everything)
+* Add additional details for Assets
 
 
 Major Data Editing Tasks
@@ -40,6 +41,8 @@ Major Data Editing Tasks
 * Add 2019 WRST Trail survey
 * Add Bartlet Cove assets
 * Add 2019 DENA Culvert survey
+* Add Comm Tower at GLBA (86988/1482171) southwest of 91285
+* Add KEFJ Roadside signs (from installations/RTK survey)
 * Populate missing map labels (Name in LOCATION popup) -- mostly buildings (Can grab from POI)
 * Support additional asset codes (e.g. maintained landscapes) from LOCATIONS
   - Focus on those that are parents to existing items
