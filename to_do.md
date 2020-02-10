@@ -39,7 +39,6 @@ Major Data Editing Tasks
 * Add 2019 Chilkoot Trail features
 * Add 2019 WRST Trail survey
 * Add Bartlet Cove assets
-* Add support for road side features
 * Add 2019 DENA Culvert survey
 * Populate missing map labels (Name in LOCATION popup) -- mostly buildings (Can grab from POI)
 * Support additional asset codes (e.g. maintained landscapes) from LOCATIONS
@@ -47,6 +46,15 @@ Major Data Editing Tasks
 * Add building assets (when we have photos)
 * Fuel storage tanks?
 * General review and cleanup of misc issue
+  - Resolve missing trail @ Savage river and McKinley Station (surveyed in 2015 but not in DB)
+  - End of most trails not as surveyed (or at trail head sign) connectors have been added
+    + rethink this connectors are just for routing and do not reflect lengths for asset management
+  - What to do with Trail End/Start "trails side features"  Ignore or show more info?
+  - Report to compare GIS vs FMSS descriptions for DENA 2015 trail features
+    + new/missing assets
+    + quantity mismatch
+    + feature type mismatch
+    + Example Asset is 1502607
 
 
 Known Bugs
@@ -58,6 +66,9 @@ Known Bugs
 * The parent ID in the asset popup should only be a link if we have a marker
   currently we are checking the parent, but some locations with assets are
   not parents (ie they have assets, but no children)
+* Improve SQL queries to deal with multiple photo ids (see FIXME is building processing scripts)
+  - may require tweaks to photos.json, facilities.csv and main.js
+* Improve SQL queries for selecting facilities/assets as map features
 
 
 Optional Enhancements
@@ -65,3 +76,12 @@ Optional Enhancements
 * Improve sync time with Maximo
 * Explore additional solution for markers on linear features (roads, trails)
   - current locations are not very convenient, and can be confusing (trail network).
+
+
+More Potential Features
+-----------------------
+* Printing
+* Filtering
+* Goto Lat/Long
+* Display Lat/Long
+* Mileposts for roads/trails
