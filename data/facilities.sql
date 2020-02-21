@@ -99,6 +99,39 @@ LEFT JOIN #PhotoId_G as p3 on p3.ID = g.GEOMETRYID
 LEFT JOIN #PhotoId_L as p4 on p4.ID = g.FACLOCID
 WHERE (p1.ID IS NOT NULL OR p2.ID IS NOT NULL OR p3.ID IS NOT NULL OR p4.ID IS NOT NULL OR g.FACLOCID IS NOT NULL OR g.FACASSETID IS NOT NULL)
 
+SELECT g.FACLOCID, g.FACASSETID, g.MAPLABEL, g.Shape, dbo.concat4id(p1.ID, p2.ID, p3.ID, p4.ID) AS PhotoId,
+        CASE WHEN g.ASSETTYPE = 'Other' THEN g.ASSETTYPEOTHDESC ELSE ASSETTYPE END AS FEATTYPE,
+        g.ASSETDESC AS FEATDESC
+INTO #Misc_Pt
+FROM akr_facility2.gis.AKR_ASSET_PT_evw as g
+LEFT JOIN #PhotoId_A as p1 on p1.ID = g.FACASSETID
+LEFT JOIN #PhotoId_F as p2 on p2.ID = g.FEATUREID
+LEFT JOIN #PhotoId_G as p3 on p3.ID = g.GEOMETRYID
+LEFT JOIN #PhotoId_L as p4 on p4.ID = g.FACLOCID
+WHERE (p1.ID IS NOT NULL OR p2.ID IS NOT NULL OR p3.ID IS NOT NULL OR p4.ID IS NOT NULL OR g.FACLOCID IS NOT NULL OR g.FACASSETID IS NOT NULL)
+
+SELECT g.FACLOCID, g.FACASSETID, g.MAPLABEL, g.Shape, dbo.concat4id(p1.ID, p2.ID, p3.ID, p4.ID) AS PhotoId,
+        CASE WHEN g.ASSETTYPE = 'Other' THEN g.ASSETTYPEOTHDESC ELSE ASSETTYPE END AS FEATTYPE,
+        g.ASSETDESC AS FEATDESC
+INTO #Misc_Py
+FROM akr_facility2.gis.AKR_ASSET_PY_evw as g
+LEFT JOIN #PhotoId_A as p1 on p1.ID = g.FACASSETID
+LEFT JOIN #PhotoId_F as p2 on p2.ID = g.FEATUREID
+LEFT JOIN #PhotoId_G as p3 on p3.ID = g.GEOMETRYID
+LEFT JOIN #PhotoId_L as p4 on p4.ID = g.FACLOCID
+WHERE (p1.ID IS NOT NULL OR p2.ID IS NOT NULL OR p3.ID IS NOT NULL OR p4.ID IS NOT NULL OR g.FACLOCID IS NOT NULL OR g.FACASSETID IS NOT NULL)
+
+SELECT g.FACLOCID, g.FACASSETID, g.MAPLABEL, g.Shape, dbo.concat4id(p1.ID, p2.ID, p3.ID, p4.ID) AS PhotoId,
+        CASE WHEN g.ASSETTYPE = 'Other' THEN g.ASSETTYPEOTHDESC ELSE ASSETTYPE END AS FEATTYPE,
+        g.ASSETDESC AS FEATDESC
+INTO #Misc_Ln
+FROM akr_facility2.gis.AKR_ASSET_LN_evw as g
+LEFT JOIN #PhotoId_A as p1 on p1.ID = g.FACASSETID
+LEFT JOIN #PhotoId_F as p2 on p2.ID = g.FEATUREID
+LEFT JOIN #PhotoId_G as p3 on p3.ID = g.GEOMETRYID
+LEFT JOIN #PhotoId_L as p4 on p4.ID = g.FACLOCID
+WHERE (p1.ID IS NOT NULL OR p2.ID IS NOT NULL OR p3.ID IS NOT NULL OR p4.ID IS NOT NULL OR g.FACLOCID IS NOT NULL OR g.FACASSETID IS NOT NULL)
+
 
 -------------------------
 --
@@ -330,6 +363,65 @@ RIGHT JOIN
       #Roads
     WHERE
       FACASSETID IS NULL AND ISBRIDGE = 'Yes'
+  UNION ALL
+    -- Miscellaneous points (Center Point)
+    SELECT
+      'Misc' AS Kind,
+      FACLOCID, MAPLABEL,
+      Shape.STY AS Latitude, Shape.STX AS Longitude,
+      '' as Size,
+      PhotoId AS Photo_Id
+    FROM
+      #Misc_Pt
+    WHERE
+      FACASSETID IS NULL
+  UNION ALL
+    -- Miscellaneous polygons (centroid)
+    SELECT
+      'Misc' AS Kind,
+      FACLOCID, MAPLABEL,
+      Shape.STCentroid().STY AS Latitude, Shape.STCentroid().STX AS Longitude,
+      '' as Size,
+      PhotoId AS Photo_Id
+    FROM
+      #Misc_Py
+    WHERE
+      FACASSETID IS NULL
+  UNION ALL
+    -- Miscellaneous lines (All start and end points for a given FACASSETID that are not coincident
+    --         with another end or start point respectively)
+    SELECT
+      'Misc' AS Kind,
+      g1.FACLOCID, g1.MAPLABEL,
+      g1.Latitude, g1.Longitude,
+      '' as Size,
+      g1.PhotoId AS Photo_Id
+    FROM (
+      SELECT 
+        FACLOCID, PhotoId, MAPLABEL, FEATTYPE,
+        Latitude, Longitude
+      FROM (
+          SELECT
+            FACLOCID, PhotoId, MAPLABEL, FEATTYPE,
+            Shape.STStartPoint().STY AS Latitude, Shape.STStartPoint().STX AS Longitude
+          FROM
+            #Misc_Ln
+          WHERE
+            FACASSETID IS NULL
+        UNION ALL
+          SELECT
+            FACLOCID, PhotoId, MAPLABEL, FEATTYPE,
+            Shape.STEndPoint().STY AS Latitude, Shape.STEndPoint().STX AS Longitude
+          FROM
+            #Misc_Ln
+          WHERE
+            FACASSETID IS NULL
+        ) AS temp
+      GROUP BY
+        FACLOCID, PhotoId, MAPLABEL, FEATTYPE, Latitude, Longitude
+      HAVING
+        COUNT(*) = 1
+    ) AS g1
   ) AS g 
 ON
     g.FACLOCID = f.Location
@@ -581,6 +673,68 @@ RIGHT JOIN
         #Roads
       WHERE
         FACASSETID IS NOT NULL AND ISBRIDGE = 'Yes'
+    UNION ALL
+      -- Miscellaneous points (Center Point)
+      SELECT
+        'Misc' AS Kind,
+        FACASSETID,
+        PhotoId AS Photo_Id,
+        MAPLABEL AS [Name],
+        '' AS [Desc],
+        Shape.STY AS Latitude, Shape.STX AS Longitude
+      FROM
+        #Misc_Pt
+      WHERE
+        FACASSETID IS NOT NULL
+    UNION ALL
+      -- Miscellaneous polygons (centroid)
+      SELECT
+        'Misc' AS Kind,
+        FACASSETID,
+        PhotoId AS Photo_Id,
+        MAPLABEL AS [Name],
+        '' AS [Desc],
+        Shape.STCentroid().STY AS Latitude, Shape.STCentroid().STX AS Longitude
+      FROM
+        #Misc_Py
+      WHERE
+        FACASSETID IS NOT NULL
+    UNION ALL
+      -- Miscellaneous lines (All start and end points for a given FACASSETID that are not coincident
+      --         with another end or start point respectively)
+      SELECT
+        'Misc' AS Kind,
+        g1.FACASSETID,
+        g1.PhotoId AS Photo_Id,
+        g1.MAPLABEL AS [Name],
+        g1.FEATTYPE AS [Desc],
+        g1.Latitude, Longitude
+      FROM (
+        SELECT 
+          FACASSETID, PhotoId, MAPLABEL, FEATTYPE,
+          Latitude, Longitude
+        FROM (
+            SELECT
+              FACASSETID, PhotoId, MAPLABEL, FEATTYPE,
+              Shape.STStartPoint().STY AS Latitude, Shape.STStartPoint().STX AS Longitude
+            FROM
+              #Misc_Ln
+            WHERE
+              FACASSETID IS NOT NULL
+          UNION ALL
+            SELECT
+              FACASSETID, PhotoId, MAPLABEL, FEATTYPE,
+              Shape.STEndPoint().STY AS Latitude, Shape.STEndPoint().STX AS Longitude
+            FROM
+              #Misc_Ln
+            WHERE
+              FACASSETID IS NOT NULL
+          ) AS temp
+        GROUP BY
+          FACASSETID, PhotoId, MAPLABEL, FEATTYPE, Latitude, Longitude
+        HAVING
+          COUNT(*) = 1
+      ) AS g1
   ) AS g 
 ON
   g.FACASSETID = f.Asset
@@ -597,6 +751,9 @@ DROP TABLE #Trail_Feats
 DROP TABLE #Trail_Atts
 DROP TABLE #Roads;
 DROP TABLE #Road_Feats
+DROP TABLE #Misc_Pt
+DROP TABLE #Misc_Py
+DROP TABLE #Misc_Ln
 
 
 
