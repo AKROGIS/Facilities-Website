@@ -12,19 +12,110 @@ exec sde.set_default
 
 -------------------------
 --
+--   Create Temp tables used in queries
+--
+-------------------------
+create TABLE #PhotoId_A (ID nvarchar(50) NOT NULL PRIMARY KEY );
+create TABLE #PhotoId_F (ID nvarchar(50) NOT NULL PRIMARY KEY );
+create TABLE #PhotoId_G (ID nvarchar(50) NOT NULL PRIMARY KEY );
+create TABLE #PhotoId_L (ID nvarchar(50) NOT NULL PRIMARY KEY );
+INSERT INTO #PhotoId_A select FACASSETID from akr_facility2.gis.AKR_ATTACH_evw where FACASSETID is not null group by FACASSETID order by FACASSETID
+INSERT INTO #PhotoId_F select FEATUREID from akr_facility2.gis.AKR_ATTACH_evw where FEATUREID is not null group by FEATUREID order by FEATUREID
+INSERT INTO #PhotoId_G select GEOMETRYID from akr_facility2.gis.AKR_ATTACH_evw where GEOMETRYID is not null group by GEOMETRYID order by GEOMETRYID
+INSERT INTO #PhotoId_L select FACLOCID from akr_facility2.gis.AKR_ATTACH_evw where FACLOCID is not null group by FACLOCID order by FACLOCID
+
+SELECT g.FACLOCID, g.FACASSETID, g.MAPLABEL, g.BLDGTYPE, g.Shape, dbo.concat4id(p1.ID, p2.ID, p3.ID, p4.ID) AS PhotoId
+INTO #Buildings
+FROM akr_facility2.gis.AKR_BLDG_CENTER_PT_evw as g
+LEFT JOIN #PhotoId_A as p1 on p1.ID = g.FACASSETID
+LEFT JOIN #PhotoId_F as p2 on p2.ID = g.FEATUREID
+LEFT JOIN #PhotoId_G as p3 on p3.ID = g.GEOMETRYID
+LEFT JOIN #PhotoId_L as p4 on p4.ID = g.FACLOCID
+WHERE (p1.ID IS NOT NULL OR p2.ID IS NOT NULL OR p3.ID IS NOT NULL OR p4.ID IS NOT NULL OR g.FACLOCID IS NOT NULL OR g.FACASSETID IS NOT NULL)
+
+SELECT g.FACLOCID, g.FACASSETID, g.MAPLABEL, g.Shape, dbo.concat4id(p1.ID, p2.ID, p3.ID, p4.ID) AS PhotoId
+INTO #Parking
+FROM akr_facility2.gis.PARKLOTS_PY_evw as g
+LEFT JOIN #PhotoId_A as p1 on p1.ID = g.FACASSETID
+LEFT JOIN #PhotoId_F as p2 on p2.ID = g.FEATUREID
+LEFT JOIN #PhotoId_G as p3 on p3.ID = g.GEOMETRYID
+LEFT JOIN #PhotoId_L as p4 on p4.ID = g.FACLOCID
+WHERE (p1.ID IS NOT NULL OR p2.ID IS NOT NULL OR p3.ID IS NOT NULL OR p4.ID IS NOT NULL OR g.FACLOCID IS NOT NULL OR g.FACASSETID IS NOT NULL)
+
+SELECT g.FACLOCID, g.FACASSETID, g.MAPLABEL, g.ISBRIDGE, g.Shape, dbo.concat4id(p1.ID, p2.ID, p3.ID, p4.ID) AS PhotoId
+INTO #Trails
+FROM akr_facility2.gis.TRAILS_LN_evw as g
+LEFT JOIN #PhotoId_A as p1 on p1.ID = g.FACASSETID
+LEFT JOIN #PhotoId_F as p2 on p2.ID = g.FEATUREID
+LEFT JOIN #PhotoId_G as p3 on p3.ID = g.GEOMETRYID
+LEFT JOIN #PhotoId_L as p4 on p4.ID = g.FACLOCID
+WHERE (p1.ID IS NOT NULL OR p2.ID IS NOT NULL OR p3.ID IS NOT NULL OR p4.ID IS NOT NULL OR g.FACLOCID IS NOT NULL OR g.FACASSETID IS NOT NULL)
+AND g.LINETYPE = 'Center line'
+
+SELECT g.FACLOCID, g.FACASSETID, g.MAPLABEL, g.Shape, dbo.concat4id(p1.ID, p2.ID, p3.ID, p4.ID) AS PhotoId,
+        CASE WHEN g.TRLFEATTYPE = 'Other' THEN g.TRLFEATTYPEOTHER ELSE g.TRLFEATTYPE END + 
+          CASE WHEN g.TRLFEATSUBTYPE is NULL THEN '' ELSE ', ' + g.TRLFEATSUBTYPE END AS FEATTYPE,
+        g.TRLFEATDESC AS FEATDESC
+INTO #Trail_Feats
+FROM akr_facility2.gis.TRAILS_FEATURE_PT_evw as g
+LEFT JOIN #PhotoId_A as p1 on p1.ID = g.FACASSETID
+LEFT JOIN #PhotoId_F as p2 on p2.ID = g.FEATUREID
+LEFT JOIN #PhotoId_G as p3 on p3.ID = g.GEOMETRYID
+LEFT JOIN #PhotoId_L as p4 on p4.ID = g.FACLOCID
+WHERE (p1.ID IS NOT NULL OR p2.ID IS NOT NULL OR p3.ID IS NOT NULL OR p4.ID IS NOT NULL OR g.FACASSETID IS NOT NULL)
+OR (g.FACLOCID IS NOT NULL AND TRLFEATTYPE <> 'Trail Head'AND TRLFEATTYPE <> 'Trail End' AND TRLFEATTYPEOTHER <> 'AnchorPt')
+
+SELECT g.FACLOCID, g.FACASSETID, g.Shape, dbo.concat4id(p1.ID, p2.ID, p3.ID, p4.ID) AS PhotoId,
+        CASE WHEN g.TRLATTRTYPE = 'Other' THEN g.TRLATTRTYPEOTHER ELSE g.TRLATTRTYPE END + 
+          CASE WHEN g.TRLATTRVALUE is NULL THEN '' ELSE ', ' + g.TRLATTRVALUE END AS ATTTYPE,
+        g.TRLATTRDESC as ATTDESC
+INTO #Trail_Atts
+FROM akr_facility2.gis.TRAILS_ATTRIBUTE_PT_evw as g
+LEFT JOIN #PhotoId_A as p1 on p1.ID = g.FACASSETID
+LEFT JOIN #PhotoId_F as p2 on p2.ID = g.FEATUREID
+LEFT JOIN #PhotoId_G as p3 on p3.ID = g.GEOMETRYID
+LEFT JOIN #PhotoId_L as p4 on p4.ID = g.FACLOCID
+WHERE (p1.ID IS NOT NULL OR p2.ID IS NOT NULL OR p3.ID IS NOT NULL OR p4.ID IS NOT NULL OR g.FACLOCID IS NOT NULL OR g.FACASSETID IS NOT NULL)
+
+SELECT g.FACLOCID, g.FACASSETID, g.MAPLABEL, g.ISBRIDGE, g.Shape, dbo.concat4id(p1.ID, p2.ID, p3.ID, p4.ID) AS PhotoId
+INTO #Roads
+FROM akr_facility2.gis.ROADS_LN_evw as g
+LEFT JOIN #PhotoId_A as p1 on p1.ID = g.FACASSETID
+LEFT JOIN #PhotoId_F as p2 on p2.ID = g.FEATUREID
+LEFT JOIN #PhotoId_G as p3 on p3.ID = g.GEOMETRYID
+LEFT JOIN #PhotoId_L as p4 on p4.ID = g.FACLOCID
+WHERE (p1.ID IS NOT NULL OR p2.ID IS NOT NULL OR p3.ID IS NOT NULL OR p4.ID IS NOT NULL OR g.FACLOCID IS NOT NULL OR g.FACASSETID IS NOT NULL)
+AND g.LINETYPE = 'Center line'
+
+SELECT g.FACLOCID, g.FACASSETID, g.MAPLABEL, g.Shape, dbo.concat4id(p1.ID, p2.ID, p3.ID, p4.ID) AS PhotoId,
+        CASE WHEN g.RDFEATTYPE = 'Other' THEN g.RDFEATTYPEOTHER ELSE RDFEATTYPE END + 
+          CASE WHEN g.RDFEATSUBTYPE is NULL THEN '' ELSE ', ' + g.RDFEATSUBTYPE END AS FEATTYPE,
+        g.RDFEATDESC AS FEATDESC
+INTO #Road_Feats
+FROM akr_facility2.gis.ROADS_FEATURE_PT_evw as g
+LEFT JOIN #PhotoId_A as p1 on p1.ID = g.FACASSETID
+LEFT JOIN #PhotoId_F as p2 on p2.ID = g.FEATUREID
+LEFT JOIN #PhotoId_G as p3 on p3.ID = g.GEOMETRYID
+LEFT JOIN #PhotoId_L as p4 on p4.ID = g.FACLOCID
+WHERE (p1.ID IS NOT NULL OR p2.ID IS NOT NULL OR p3.ID IS NOT NULL OR p4.ID IS NOT NULL OR g.FACLOCID IS NOT NULL OR g.FACASSETID IS NOT NULL)
+
+
+-------------------------
+--
 --   facilities.csv
 --
 -------------------------
 
--- Facilities in GIS matching FMSS Location records
+-- Facilities in GIS matching FMSS Location records or having a photo and but no FACASSETID (selected in assets below)
 
 SELECT
     -- GIS Attributes
     g.Kind,
-    g.FACLOCID AS ID, COALESCE(g.MAPLABEL, '') AS [Name],
+    g.FACLOCID  + CASE WHEN f.[Type] = 'SALVAGE' THEN ' (Salvage)' ELSE '' END AS ID,
+    COALESCE(g.MAPLABEL, '') AS [Name],
     g.Latitude, g.Longitude,
-    g.FACLOCID AS Photo_Id, -- FIXME (Pphotos may be linked to GEOMETRYID or FEATUREID or FACASSSETID)
-    -- FMSS Attributes
+    g.Photo_Id,
+    -- FMSS Location Attributes
     COALESCE(FORMAT(TRY_CAST(f.CRV AS FLOAT), 'C', 'en-us'), 'Unknown') AS CRV,
     COALESCE(FORMAT(TRY_CAST(f.DM AS FLOAT), 'C', 'en-us'), 'Unknown') AS DM,
     COALESCE(CONVERT(varchar, YEAR(GetDate()) - TRY_CONVERT(INT, f.YearBlt)) + ' yrs', YearBlt) AS Age,
@@ -34,29 +125,58 @@ SELECT
     f.Parent, f.Status AS [Status]
 FROM
     akr_facility2.dbo.FMSSExport AS f
-JOIN
+RIGHT JOIN
     (
     -- Buildings (Center Point)
     SELECT
       'Building' AS Kind,
       FACLOCID, MAPLABEL,
       Shape.STY AS Latitude, Shape.STX AS Longitude,
-      '' as Size
+      '' as Size,
+      PhotoId AS Photo_Id
     FROM
-      akr_facility2.gis.AKR_BLDG_CENTER_PT_evw
-    WHERE 
-      FACLOCID IS NOT NULL
+      #Buildings
+    WHERE
+      FACASSETID IS NULL
   UNION ALL
     -- Parking Lots (Centroid)
     SELECT
       'Parking' AS Kind,
       FACLOCID, MAPLABEL,
       Shape.STCentroid().STY AS Latitude, Shape.STCentroid().STX AS Longitude,
-      ' (GIS: '+FORMAT(GEOGRAPHY::STGeomFromText(shape.STAsText(),4269).STArea() * 3.28084 * 3.28084,'N0') + 'sf)' as Size
+      ' (GIS: '+FORMAT(GEOGRAPHY::STGeomFromText(shape.STAsText(),4269).STArea() * 3.28084 * 3.28084,'N0') + 'sf)' as Size,
+      PhotoId AS Photo_Id
     FROM
-      akr_facility2.gis.PARKLOTS_PY_evw
-    WHERE 
-      FACLOCID IS NOT NULL
+      #Parking
+    WHERE
+      FACASSETID IS NULL
+  UNION ALL
+    SELECT DISTINCT
+      -- road features (asserts by default, must have a FACLOCID)
+      'Road' AS Kind,
+      FACLOCID,
+      FEATTYPE + CASE WHEN FEATDESC IS NULL THEN ' (' + FEATDESC + ')' ELSE '' END AS MAPLABEL,
+      Shape.STY AS Latitude, Shape.STX AS Longitude,
+      '' AS Size,
+      PhotoID AS Photo_Id
+    FROM
+      #Road_Feats
+    WHERE
+      FACASSETID IS NULL AND PhotoId IS NULL
+  UNION ALL
+    SELECT DISTINCT
+      -- trail features (asserts by default, must have a FACLOCID)
+      'Trail' AS Kind,
+      FACLOCID,
+      FEATTYPE + CASE WHEN FEATDESC IS NULL THEN ' (' + FEATDESC + ')' ELSE '' END AS MAPLABEL,
+      Shape.STY AS Latitude, Shape.STX AS Longitude,
+      '' AS Size,
+      PhotoID AS Photo_Id
+    FROM
+      #Trail_Feats
+    WHERE
+      FACASSETID IS NULL AND PhotoId IS NULL
+  -- SKIP trail attributes - Will only be an asset (FACLOCID is used as a foreign key to trail)
   UNION ALL
     -- Trails (All start and end points for a given FACLOCID that are not coincident
     --         with another end or start point respectively)
@@ -64,45 +184,48 @@ JOIN
       'Trail' AS Kind,
       g1.FACLOCID, g1.MAPLABEL,
       g1.Latitude, g1.Longitude,
-      '(GIS: '+FORMAT(g2.Feet,'N0') + 'ft)' as Size
+      '(GIS: '+FORMAT(g2.Feet,'N0') + 'ft)' as Size,
+      g1.PhotoId AS Photo_Id
     FROM (
       SELECT 
-        FACLOCID, MAPLABEL,
+        FACLOCID, PhotoId, MAPLABEL,
         Latitude, Longitude
       FROM (
           SELECT
-            FACLOCID, MAPLABEL,
+            FACLOCID, PhotoId, MAPLABEL,
             Shape.STStartPoint().STY AS Latitude, Shape.STStartPoint().STX AS Longitude
           FROM
-            akr_facility2.gis.TRAILS_LN_evw
+            #Trails
           WHERE
-            FACLOCID IS NOT NULL AND ISBRIDGE = 'No' AND LINETYPE = 'Center line'
+            FACASSETID IS NULL AND ISBRIDGE <> 'Yes'
         UNION ALL
           SELECT
-            FACLOCID, MAPLABEL,
+            FACLOCID, PhotoId, MAPLABEL,
             Shape.STEndPoint().STY AS Latitude, Shape.STEndPoint().STX AS Longitude
           FROM
-            akr_facility2.gis.TRAILS_LN_evw
+            #Trails
           WHERE
-            FACLOCID IS NOT NULL AND ISBRIDGE = 'No' AND LINETYPE = 'Center line'
+            FACASSETID IS NULL AND ISBRIDGE <> 'Yes'
         ) AS temp
       GROUP BY
-        FACLOCID, MAPLABEL, Latitude, Longitude
+        FACLOCID, PhotoId, MAPLABEL, Latitude, Longitude
       HAVING
         COUNT(*) = 1
     ) AS g1
     JOIN (
       SELECT
-        FACLOCID,
+        FACLOCID, PhotoId, MAPLABEL,
         SUM(GEOGRAPHY::STGeomFromText(shape.STAsText(),4269).STLength()) * 3.28084 as Feet
       FROM
-        akr_facility2.gis.TRAILS_LN_evw
+        #Trails
       WHERE
-        FACLOCID IS NOT NULL AND LINETYPE = 'Center line'
+        FACASSETID IS NULL AND ISBRIDGE <> 'Yes'
       GROUP BY
-        FACLOCID
+        FACLOCID, PhotoId, MAPLABEL
     ) AS g2
-    ON g1.FACLOCID = g2.FACLOCID
+    ON COALESCE(g1.FACLOCID,'') = COALESCE(g2.FACLOCID,'')
+    AND COALESCE(g1.PhotoId,'') = COALESCE(g2.PhotoId,'')
+    AND COALESCE(g1.MAPLABEL,'') = COALESCE(g2.MAPLABEL,'')
   UNION ALL
     -- Roads (All start and end points for a given FACLOCID that are not coincident
     --         with another end or start point respectively)
@@ -110,45 +233,47 @@ JOIN
       'Road' AS Kind,
       g1.FACLOCID, g1.MAPLABEL,
       g1.Latitude, g1.Longitude,
-      ' (GIS: '+FORMAT(g2.Miles,'N2') + 'mi)' as Size
+      ' (GIS: '+FORMAT(g2.Miles,'N2') + 'mi)' as Size,
+      g1.PhotoId AS Photo_Id
     FROM (
       SELECT 
-        FACLOCID, MAPLABEL,
+        FACLOCID, PhotoId, MAPLABEL,
         Latitude, Longitude
       FROM (
           SELECT
-            FACLOCID, MAPLABEL,
+            FACLOCID, PhotoId, MAPLABEL,
             Shape.STStartPoint().STY AS Latitude, Shape.STStartPoint().STX AS Longitude
           FROM
-            akr_facility2.gis.ROADS_LN_evw
+            #Roads
           WHERE
-            FACLOCID IS NOT NULL AND ISBRIDGE = 'No' AND LINETYPE = 'Center line'
+            FACASSETID IS NULL AND ISBRIDGE <> 'Yes'
         UNION ALL
           SELECT
-            FACLOCID, MAPLABEL,
+            FACLOCID, PhotoId, MAPLABEL,
             Shape.STEndPoint().STY AS Latitude, Shape.STEndPoint().STX AS Longitude
           FROM
-            akr_facility2.gis.ROADS_LN_evw
+            #Roads
           WHERE
-            FACLOCID IS NOT NULL AND ISBRIDGE = 'No' AND LINETYPE = 'Center line'
+            FACASSETID IS NULL AND ISBRIDGE <> 'Yes'
         ) AS temp
       GROUP BY
-        FACLOCID, MAPLABEL, Latitude, Longitude
+        FACLOCID, PhotoId, MAPLABEL, Latitude, Longitude
       HAVING
         COUNT(*) = 1
     ) AS g1
     JOIN (
       SELECT
-        FACLOCID,
+        FACLOCID, PhotoId, MAPLABEL,
         SUM(GEOGRAPHY::STGeomFromText(shape.STAsText(),4269).STLength()) * 0.000621371 as Miles
       FROM
-        akr_facility2.gis.ROADS_LN_evw
+        #Roads
       WHERE
-        FACLOCID IS NOT NULL AND LINETYPE = 'Center line'
+        FACASSETID IS NULL AND ISBRIDGE <> 'Yes'
       GROUP BY
-        FACLOCID
+        FACLOCID, PhotoId, MAPLABEL
     ) AS g2
-    ON g1.FACLOCID = g2.FACLOCID
+    ON COALESCE(g1.FACLOCID,'') = COALESCE(g2.FACLOCID,'')
+    AND COALESCE(g1.PhotoId,'') = COALESCE(g2.PhotoId,'') AND COALESCE(g1.MAPLABEL,'') = COALESCE(g2.MAPLABEL,'')
   UNION ALL
     -- Trail Bridges (Middle vertex, or average of two middle vertices)
     SELECT
@@ -171,11 +296,12 @@ JOIN
         ELSE -- Odd
           Shape.STPointN(1 + Shape.STNumPoints()/2).STX
       END AS Longitude,
-      '' AS Size
+      '' AS Size,
+      PhotoId AS Photo_Id
     FROM
-      akr_facility2.gis.ROADS_LN_evw
+      #Trails
     WHERE
-      FACLOCID IS NOT NULL AND ISBRIDGE = 'Yes'
+      FACASSETID IS NULL AND ISBRIDGE = 'Yes'
   UNION ALL
     -- Road Bridges (Middle vertex, or average of two middle vertices)
     SELECT
@@ -198,18 +324,15 @@ JOIN
         ELSE -- Odd
           Shape.STPointN(1 + Shape.STNumPoints()/2).STX
       END AS Longitude,
-      '' AS Size
+      '' AS Size,
+      PhotoId AS Photo_Id
     FROM
-      akr_facility2.gis.TRAILS_LN_evw
+      #Roads
     WHERE
-      FACLOCID IS NOT NULL AND ISBRIDGE = 'Yes'
+      FACASSETID IS NULL AND ISBRIDGE = 'Yes'
   ) AS g 
 ON
     g.FACLOCID = f.Location
-WHERE
-    f.[Type] = 'OPERATING'
-
-
 
 -------------------------
 --
@@ -234,80 +357,246 @@ FROM
 RIGHT JOIN
   (
       SELECT DISTINCT
-        -- road features
+        -- road features (asserts by default, has a photoID or FACASSETID)
         'Road' AS Kind,
-        f.FACASSETID,
-        COALESCE(p.FACLOCID, COALESCE(p.FACASSETID, COALESCE(p.FEATUREID, p.GEOMETRYID))) AS Photo_Id,
-        CASE WHEN f.RDFEATTYPE = 'Other' THEN f.RDFEATTYPEOTHER ELSE f.RDFEATTYPE END + 
-          CASE WHEN f.RDFEATSUBTYPE is NULL THEN '' ELSE ', ' + f.RDFEATSUBTYPE END AS [Name],
-        f.RDFEATDESC as [Desc],
-        f.Shape.STY AS Latitude, f.Shape.STX AS Longitude
+        FACASSETID,
+        PhotoID AS Photo_Id,
+        FEATTYPE AS [Name],
+        FEATDESC as [Desc],
+        Shape.STY AS Latitude, Shape.STX AS Longitude
       FROM
-        akr_facility2.gis.ROADS_FEATURE_PT_evw AS f
-      JOIN
-        akr_facility2.gis.AKR_ATTACH_evw AS p
-      ON
-        -- FIXME Breaks if a ATTACH has more than one foreign key (i.e. a photo of more than one object)
-        f.GEOMETRYID = p.GEOMETRYID OR f.FEATUREID = p.FEATUREID 
-        --f.FACLOCID = p.FACLOCID OR f.FACASSETID = p.FACASSETID OR f.FEATUREID = p.FEATUREID OR f.GEOMETRYID = p.GEOMETRYID
+        #Road_Feats
       WHERE
-        f.FACASSETID IS NOT NULL OR p.ATCHLINK IS NOT NULL
+        FACASSETID IS NOT NULL OR PhotoId IS NOT NULL
     UNION ALL
       SELECT DISTINCT
-        -- trail features
+        -- trail features (asserts by default, has a photoID or FACASSETID)
         'Trail' AS Kind,
-        f.FACASSETID,
-        COALESCE(p.FACLOCID, COALESCE(p.FACASSETID, COALESCE(p.FEATUREID, p.GEOMETRYID))) AS Photo_Id,
-        CASE WHEN f.TRLFEATTYPE = 'Other' THEN f.TRLFEATTYPEOTHER ELSE f.TRLFEATTYPE END + 
-          CASE WHEN f.TRLFEATSUBTYPE is NULL THEN '' ELSE ', ' + f.TRLFEATSUBTYPE END AS [Name],
-        f.TRLFEATDESC as [Desc],
-        f.Shape.STY AS Latitude, f.Shape.STX AS Longitude
+        FACASSETID,
+        PhotoID AS Photo_Id,
+        FEATTYPE AS [Name],
+        FEATDESC as [Desc],
+        Shape.STY AS Latitude, Shape.STX AS Longitude
       FROM
-        akr_facility2.gis.TRAILS_FEATURE_PT_evw AS f
-      JOIN
-        akr_facility2.gis.AKR_ATTACH_evw AS p
-      ON
-        -- FIXME Breaks if a ATTACH has more than one foreign key (i.e. a photo of more than one object)
-        f.GEOMETRYID = p.GEOMETRYID OR f.FEATUREID = p.FEATUREID 
-        --f.FACLOCID = p.FACLOCID OR f.FACASSETID = p.FACASSETID OR f.FEATUREID = p.FEATUREID OR f.GEOMETRYID = p.GEOMETRYID
+        #Trail_Feats
       WHERE
-        f.FACASSETID IS NOT NULL OR p.ATCHLINK IS NOT NULL
+        FACASSETID IS NOT NULL OR PhotoId IS NOT NULL
     UNION ALL
-      -- trail attributes (surface material, etc)
+      -- trail attributes (surface material, etc) (asserts by default, has a photoID or FACASSETID)
       SELECT DISTINCT
         'Trail' AS Kind,
-        a.FACASSETID,
-        COALESCE(p.FACLOCID, COALESCE(p.FACASSETID, COALESCE(p.FEATUREID, p.GEOMETRYID))) AS Photo_Id,
-        CASE WHEN a.TRLATTRTYPE = 'Other' THEN a.TRLATTRTYPEOTHER ELSE a.TRLATTRTYPE END + 
-          CASE WHEN a.TRLATTRVALUE is NULL THEN '' ELSE ', ' + a.TRLATTRVALUE END AS [Name],
-        a.TRLATTRDESC as [Desc],
-        a.Shape.STY AS Latitude, a.Shape.STX AS Longitude
+        FACASSETID,
+        PhotoID AS Photo_Id,
+        ATTTYPE AS [Name],
+        ATTDESC as [Desc],
+        Shape.STY AS Latitude, Shape.STX AS Longitude
       FROM
-        akr_facility2.gis.TRAILS_ATTRIBUTE_PT_evw AS a
-      JOIN
-        akr_facility2.gis.AKR_ATTACH_evw AS p
-      ON
-        -- FIXME Breaks if a ATTACH has more than one foreign key (i.e. a photo of more than one object)
-        -- FIXME: The general solution is VERY! slow
-        a.FACLOCID = p.FACLOCID -- OR a.FACASSETID = p.FACASSETID OR a.FEATUREID = p.FEATUREID OR a.GEOMETRYID = p.GEOMETRYID
+        #Trail_Atts
       WHERE
-        a.FACASSETID IS NOT NULL OR p.ATCHLINK IS NOT NULL
+        FACASSETID IS NOT NULL OR PhotoId IS NOT NULL
     UNION ALL
-      -- Buildings (typically out-buildings that are grouped with a main structure)
-      SELECT DISTINCT
+      -- Buildings (Center Point) - Typically out-buildings that are grouped with a main structure
+      SELECT
         'Building' AS Kind,
         FACASSETID,
-        FACASSETID AS Photo_Id,
+        PhotoId AS Photo_Id,
         MAPLABEL AS [Name],
         BLDGTYPE as [Desc],
         Shape.STY AS Latitude, Shape.STX AS Longitude
       FROM
-        akr_facility2.gis.AKR_BLDG_CENTER_PT_evw
+        #Buildings
       WHERE
-        FACASSETID IS NOT NULL AND FACLOCID IS NULL
+        FACASSETID IS NOT NULL
+    UNION ALL
+      -- Parking Lots (Centroid)
+      SELECT
+        'Parking' AS Kind,
+        FACASSETID,
+        PhotoId AS Photo_Id,
+        MAPLABEL AS [Name],
+        '' as [Desc],
+        --' (GIS: '+FORMAT(GEOGRAPHY::STGeomFromText(shape.STAsText(),4269).STArea() * 3.28084 * 3.28084,'N0') + 'sf)' as Size,
+        Shape.STCentroid().STY AS Latitude, Shape.STCentroid().STX AS Longitude
+      FROM
+        #Parking
+      WHERE
+        FACASSETID IS NOT NULL
+    UNION ALL
+      -- Roads (All start and end points for a given FACASSETID that are not coincident
+      --         with another end or start point respectively)
+      SELECT
+        'Road' AS Kind,
+        g1.FACASSETID,
+        g1.PhotoId AS Photo_Id,
+        g1.MAPLABEL AS [Name],
+        '' AS [Desc],
+        -- ' (GIS: '+FORMAT(g2.Miles,'N2') + 'mi)' as Size,
+        g1.Latitude, g1.Longitude
+      FROM (
+        SELECT 
+          FACASSETID, PhotoId, MAPLABEL,
+          Latitude, Longitude
+        FROM (
+            SELECT
+              FACASSETID, PhotoId, MAPLABEL,
+              Shape.STStartPoint().STY AS Latitude, Shape.STStartPoint().STX AS Longitude
+            FROM
+              #Roads
+            WHERE
+              FACASSETID IS NOT NULL AND ISBRIDGE <> 'Yes'
+          UNION ALL
+            SELECT
+              FACASSETID, PhotoId, MAPLABEL,
+              Shape.STEndPoint().STY AS Latitude, Shape.STEndPoint().STX AS Longitude
+            FROM
+              #Roads
+            WHERE
+              FACASSETID IS NOT NULL AND ISBRIDGE <> 'Yes'
+          ) AS temp
+        GROUP BY
+          FACASSETID, PhotoId, MAPLABEL, Latitude, Longitude
+        HAVING
+          COUNT(*) = 1
+      ) AS g1
+      JOIN (
+        SELECT
+          FACASSETID, PhotoId, MAPLABEL,
+          SUM(GEOGRAPHY::STGeomFromText(shape.STAsText(),4269).STLength()) * 0.000621371 as Miles
+        FROM
+          #Roads
+        WHERE
+          FACASSETID IS NOT NULL AND ISBRIDGE <> 'Yes'
+        GROUP BY
+          FACASSETID, PhotoId, MAPLABEL
+      ) AS g2
+      ON g1.FACASSETID = g2.FACASSETID
+      AND COALESCE(g1.PhotoId,'') = COALESCE(g2.PhotoId,'') AND COALESCE(g1.MAPLABEL,'') = COALESCE(g2.MAPLABEL,'')
+    UNION ALL
+      -- Trails (All start and end points for a given FACASSETID that are not coincident
+      --         with another end or start point respectively)
+      SELECT
+        'Trail' AS Kind,
+        g1.FACASSETID,
+        g1.PhotoId AS Photo_Id,
+        g1.MAPLABEL AS [Name],
+        '' AS [Desc],
+        -- '(GIS: '+FORMAT(g2.Feet,'N0') + 'ft)' as Size,
+        g1.Latitude, g1.Longitude
+      FROM (
+        SELECT 
+          FACASSETID, PhotoId, MAPLABEL,
+          Latitude, Longitude
+        FROM (
+            SELECT
+              FACASSETID, PhotoId, MAPLABEL,
+              Shape.STStartPoint().STY AS Latitude, Shape.STStartPoint().STX AS Longitude
+            FROM
+              #Trails
+            WHERE
+              FACASSETID IS NOT NULL AND ISBRIDGE <> 'Yes'
+          UNION ALL
+            SELECT
+              FACASSETID, PhotoId, MAPLABEL,
+              Shape.STEndPoint().STY AS Latitude, Shape.STEndPoint().STX AS Longitude
+            FROM
+              #Trails
+            WHERE
+              FACASSETID IS NOT NULL AND ISBRIDGE <> 'Yes'
+          ) AS temp
+        GROUP BY
+          FACASSETID, PhotoId, MAPLABEL, Latitude, Longitude
+        HAVING
+          COUNT(*) = 1
+      ) AS g1
+      JOIN (
+        SELECT
+          FACASSETID, PhotoId, MAPLABEL,
+          SUM(GEOGRAPHY::STGeomFromText(shape.STAsText(),4269).STLength()) * 3.28084 as Feet
+        FROM
+          #Trails
+        WHERE
+          FACASSETID IS NOT NULL AND ISBRIDGE <> 'Yes'
+        GROUP BY
+          FACASSETID, PhotoId, MAPLABEL
+      ) AS g2
+      ON g1.FACASSETID = g2.FACASSETID
+      AND COALESCE(g1.PhotoId,'') = COALESCE(g2.PhotoId,'') AND COALESCE(g1.MAPLABEL,'') = COALESCE(g2.MAPLABEL,'')
+    UNION ALL
+      -- Trail Bridges (Middle vertex, or average of two middle vertices)
+      SELECT
+        'Bridge' AS Kind,
+        FACASSETID,
+        PhotoId AS Photo_Id,
+        MAPLABEL AS [Name],
+        '' AS [Desc],
+        -- '' AS Size,
+        -- Mid point of bridge
+        CASE
+          WHEN
+            (Shape.STNumPoints() % 2) = 0
+          THEN --Even number of vertices
+            (Shape.STPointN(Shape.STNumPoints()/2).STY + Shape.STPointN(1 + Shape.STNumPoints()/2).STY)/2.0
+          ELSE -- Odd
+            Shape.STPointN(1 + Shape.STNumPoints()/2).STY
+        END AS Latitude,
+        CASE
+          WHEN
+            (Shape.STNumPoints() % 2) = 0
+          THEN --Even
+            (Shape.STPointN(Shape.STNumPoints()/2).STX + Shape.STPointN(1 + Shape.STNumPoints()/2).STX)/2.0
+          ELSE -- Odd
+            Shape.STPointN(1 + Shape.STNumPoints()/2).STX
+        END AS Longitude
+      FROM
+        #Trails
+      WHERE
+        FACASSETID IS NOT NULL AND ISBRIDGE = 'Yes'
+    UNION ALL
+      -- Road Bridges (Middle vertex, or average of two middle vertices)
+      SELECT
+        'Bridge' AS Kind,
+        FACASSETID,
+        PhotoId AS Photo_Id,
+        MAPLABEL AS [Name],
+        '' AS [Desc],
+        -- '' AS Size,
+        -- Get mid point of bridge
+        CASE
+          WHEN
+            (Shape.STNumPoints() % 2) = 0
+          THEN --Even number of vertices
+            (Shape.STPointN(Shape.STNumPoints()/2).STY + Shape.STPointN(1 + Shape.STNumPoints()/2).STY)/2.0
+          ELSE -- Odd
+            Shape.STPointN(1 + Shape.STNumPoints()/2).STY
+        END AS Latitude,
+        CASE
+          WHEN
+            (Shape.STNumPoints() % 2) = 0
+          THEN --Even
+            (Shape.STPointN(Shape.STNumPoints()/2).STX + Shape.STPointN(1 + Shape.STNumPoints()/2).STX)/2.0
+          ELSE -- Odd
+            Shape.STPointN(1 + Shape.STNumPoints()/2).STX
+        END AS Longitude
+      FROM
+        #Roads
+      WHERE
+        FACASSETID IS NOT NULL AND ISBRIDGE = 'Yes'
   ) AS g 
 ON
   g.FACASSETID = f.Asset
+
+
+DROP TABLE #PhotoId_A;
+DROP TABLE #PhotoId_F;
+DROP TABLE #PhotoId_G;
+DROP TABLE #PhotoId_L;
+DROP TABLE #Buildings;
+DROP TABLE #Parking;
+DROP TABLE #Trails;
+DROP TABLE #Trail_Feats
+DROP TABLE #Trail_Atts
+DROP TABLE #Roads;
+DROP TABLE #Road_Feats
 
 
 

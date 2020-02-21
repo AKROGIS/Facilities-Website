@@ -89,4 +89,34 @@ HAVING COUNT(*) > 1
                FROM gis.AKR_ATTACH_evw
               WHERE ATCHLINK LIKE 'https://akrgis.nps.gov/fmss/photos/web/%' AND FACLOCID IS NOT NULL
 
-select 
+
+create TABLE #PhotoId_A (ID nvarchar(50) NOT NULL PRIMARY KEY );
+create TABLE #PhotoId_F (ID nvarchar(50) NOT NULL PRIMARY KEY );
+create TABLE #PhotoId_G (ID nvarchar(50) NOT NULL PRIMARY KEY );
+create TABLE #PhotoId_L (ID nvarchar(50) NOT NULL PRIMARY KEY );
+INSERT INTO #PhotoId_A select FACASSETID from gis.AKR_ATTACH_evw where FACASSETID is not null group by FACASSETID order by FACASSETID
+INSERT INTO #PhotoId_F select FEATUREID from gis.AKR_ATTACH_evw where FEATUREID is not null group by FEATUREID order by FEATUREID
+INSERT INTO #PhotoId_G select GEOMETRYID from gis.AKR_ATTACH_evw where GEOMETRYID is not null group by GEOMETRYID order by GEOMETRYID
+INSERT INTO #PhotoId_L select FACLOCID from gis.AKR_ATTACH_evw where FACLOCID is not null group by FACLOCID order by FACLOCID
+
+-- Find all building centroids with an FMSS id, or a photo
+-- Photo may be referenced by one or more of FACASSETID, FEATUREID, GEOMETRYID, FACLOCID
+-- replace dbo.concat4id() with CONCAT_WS('|') on SQLserver 2017+
+select g.FACLOCID, g.FACASSETID, dbo.concat4id(p1.ID, p2.ID, p3.ID, p4.ID) AS PhotoId
+from gis.AKR_BLDG_CENTER_PT_evw as g
+--from gis.PARKLOTS_PY_evw as g
+--FROM gis.ROADS_LN_evw as g
+--from gis.ROADS_FEATURE_PT_evw as g
+--FROM gis.TRAILS_LN_evw as g
+--from gis.TRAILS_FEATURE_PT_evw as g
+--from gis.TRAILS_ATTRIBUTE_PT_evw as g
+LEFT JOIN #PhotoId_A as p1 on p1.ID = g.FACASSETID
+LEFT JOIN #PhotoId_F as p2 on p2.ID = g.FEATUREID
+LEFT JOIN #PhotoId_G as p3 on p3.ID = g.GEOMETRYID
+LEFT JOIN #PhotoId_L as p4 on p4.ID = g.FACLOCID
+where p1.ID is not null or p2.ID is not null or p3.ID is not null or p4.ID is not null or g.FACLOCID is not null or g.FACASSETID is not null
+
+DROP TABLE #PhotoId_A;
+DROP TABLE #PhotoId_F;
+DROP TABLE #PhotoId_G;
+DROP TABLE #PhotoId_L;
