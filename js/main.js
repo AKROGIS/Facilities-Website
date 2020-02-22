@@ -274,12 +274,14 @@ export default class FacilityMap {
     const parkingIcon = buildIcon('images/parking-s.svg')
     const bridgeIcon = buildIcon('images/bridge-s.svg')
     const buildingIcon = buildIcon('images/ranger-s.svg')
+    const gasIcon = buildIcon('images/gas-s.svg')
 
     const roadAssetIcon = buildAssetIcon('images/car-s.svg')
     const trailAssetIcon = buildAssetIcon('images/trail-s.svg')
     const parkingAssetIcon = buildAssetIcon('images/parking-s.svg')
     const bridgeAssetIcon = buildAssetIcon('images/bridge-s.svg')
     const buildingAssetIcon = buildAssetIcon('images/ranger-s.svg')
+    const gasAssetIcon = buildAssetIcon('images/gas-s.svg')
 
     const unknownIcon = buildIcon('?')
 
@@ -297,6 +299,7 @@ export default class FacilityMap {
           case 'Parking' : icon = asset ? parkingAssetIcon : parkingIcon; break;
           case 'Bridge' : icon = asset ? bridgeAssetIcon : bridgeIcon; break;
           case 'Trail' : icon = asset ? trailAssetIcon : trailIcon; break;
+          case 'Misc' : icon = asset ? gasAssetIcon : gasIcon; break;
         }
         if (asset) {icon.className = 'asset'}
         return L.marker(latlng, {icon: icon})
