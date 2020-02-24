@@ -40,14 +40,14 @@ Major Data Editing Tasks
 * Add 2019 Chilkoot Trail features
 * Add 2019 WRST Trail survey
 * Add Bartlet Cove assets
-* Add 2019 DENA Culvert survey
+* Move road signs from Installations to facilities
 * Add Comm Tower at GLBA (86988/1482171) southwest of 91285
 * Add KEFJ Roadside signs (from installations/RTK survey)
 * Populate missing map labels (Name in LOCATION popup) -- mostly buildings (Can grab from POI)
 * Support additional asset codes (e.g. maintained landscapes) from LOCATIONS
   - Focus on those that are parents to existing items
 * Add building assets (when we have photos)
-* Fuel storage tanks?
+* Fuel storage tanks? (DENA is done)
 * General review and cleanup of misc issue
   - Resolve missing trail @ Savage river and McKinley Station (surveyed in 2015 but not in DB)
   - End of most trails not as surveyed (or at trail head sign) connectors have been added
@@ -69,9 +69,7 @@ Known Bugs
 * The parent ID in the asset popup should only be a link if we have a marker
   currently we are checking the parent, but some locations with assets are
   not parents (ie they have assets, but no children)
-* Improve SQL queries to deal with multiple photo ids (see FIXME is building processing scripts)
-  - may require tweaks to photos.json, facilities.csv and main.js
-* Improve SQL queries for selecting facilities/assets as map features
+* Additional Icons (and selection strategy) for misc facilities
 
 
 Optional Enhancements
