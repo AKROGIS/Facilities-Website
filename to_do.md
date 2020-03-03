@@ -37,21 +37,23 @@ Potential Features
 
 Major Data Editing Tasks
 ------------------------
+* The photo with FACLOCID 58006 points to a deleted building {B8155F...
+* Road 39773 is salvaged in FMSS (and several others) remove FACLOCID, or demo road
+* GLBA many feature missing a photo are in an adjacent photo dup the attachment links
+* The AKR_Asset feature classes should default to ASSETS, not LOCATIONS
+* Many of the GLBA misc features with a photo but no FMSs have not popup attributes
+* GLBA the fire standpipe w/o a name should swap locations with the PIV (per the photos) 
 * Add 2019 Chilkoot Trail features
 * Add 2019 WRST Trail survey
-* Add Bartlet Cove assets
-* Move road signs from Installations to facilities
 * Add Comm Tower at GLBA (86988/1482171) southwest of 91285
-* Add KEFJ Roadside signs (from installations/RTK survey)
 * Populate missing map labels (Name in LOCATION popup) -- mostly buildings (Can grab from POI)
 * Support additional asset codes (e.g. maintained landscapes) from LOCATIONS
   - Focus on those that are parents to existing items
 * Add building assets (when we have photos)
-* Fuel storage tanks? (DENA is done)
 * General review and cleanup of misc issue
   - Resolve missing trail @ Savage river and McKinley Station (surveyed in 2015 but not in DB)
   - End of most trails not as surveyed (or at trail head sign) connectors have been added
-    + rethink this connectors are just for routing and do not reflect lengths for asset management
+    + remove connectors, trails should start at trailheads
   - What to do with Trail End/Start "trails side features"  Ignore or show more info?
   - Report to compare GIS vs FMSS descriptions for DENA 2015 trail features
     + new/missing assets
