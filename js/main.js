@@ -91,11 +91,11 @@ export default class FacilityMap {
 			style_id: "cjt94v8pu23wh1fqug0cnviat",  //Park Tiles Standard
 			//style_id: "cjua0op0k4q301gpbb7o7wc6t",  //Park Tiles Light
 			//style_id: "cju8w7m1l50bu1frs10dajli6",  //Park Tiles Slate
-      maxZoom: 20
+      maxZoom: 5
 		}).addTo(this.map)
 
     // Esri World Imagery
-    L.esri.basemapLayer('ImageryClarity', {minZoom: 15, maxZoom: 19, opacity: 0.8}).addTo(this.map)
+    L.esri.basemapLayer('ImageryClarity', {minZoom: 5, maxZoom: 19, opacity: 0.8}).addTo(this.map)
 
     // AKR GIS Facilities Map Service
     L.esri.dynamicMapLayer({

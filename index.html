@@ -31,19 +31,19 @@
 </head>
 <body>
 
-<div class="banner">
-  <div class="banner-title">
-    <h1>Alaska Facilities</h1>
-    <h2>A tool for locating the maintained infrastructure in Alaska's National Parks and Preserves</h2>
+<div id="header">
+  <div id="headerText">
+    <h1 id="title">Alaska Facilities</h1>
+    <h2 id="subtitle">A tool for locating the maintained infrastructure in Alaska's National Parks and Preserves</h2>
   </div>
-  <div class="banner-identity">
-    <div class="org">
-      Alaska Region GIS<br/>
-      National Park Service<br/>
-      U.S. Department of the Interior<br/>
+  <div id="logoArea">
+    <div id="organizationText">
+    Alaska Region GIS<br/>
+    National Park Service<br/>
+    U.S. Department of the Interior<br/>
     </div>
-    <div class="logo">
-      <img src="images/ArrowheadNoBackground.png" alt="National Park Service Arrowhead">
+    <div id="logo">
+    <img src="images/ArrowheadNoBackground.png" height="100%" alt="National Park Service Arrowhead">
     </div>
   </div>
 </div>
@@ -52,7 +52,10 @@
 
 <script type='module'>
 	import FacilityMap from './js/main.js';
-	new FacilityMap('map').configure();
+	const myMap = new FacilityMap('map');
+	function find(str) { myMap.find.call(myMap, str) }; // for hyperlinks in popup
+	window.find = find;
+	myMap.configure();
 </script>
 
 </body>

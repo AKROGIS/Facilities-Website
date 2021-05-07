@@ -1,73 +1,99 @@
+/* Created by regan_sarwas on 7/8/14.
+ */
+
+ body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size:0.88em;
+    padding: 0;
+    margin: 0;
+}
 html, body {
-  height: 100vh;
-  width: 100vw;
+    height: 100vh;
+    width: 100vw;
 }
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size:0.88em;
-  margin: 0;
+a {
+    font-weight: bold;
 }
 
-div.banner {
-  background: black;
-  color: white;
-  overflow: hidden;
-  border-bottom-color: rgb(56,73,32);
-  border-bottom-style: solid;
-  border-bottom-width: 4px;
+td.att_name { font-weight: bold;
+    text-align: right;}
+
+/*
+ * Header Area
+ */
+#header {
+    width: 100%;
+    background:#000000;
+    color:#fff;
+    margin:0;
+    overflow:hidden;
+    border-bottom-color:rgb(56,73,32);
+    border-bottom-style:solid;
+    border-bottom-width:4px;
 }
 
-div.banner-title {
-  padding-top: 2px;
-  padding-left: 15px;
-  float: left;
+#headerText{
+    padding-top:2px;
+    padding-left:15px;
+    float:left;
 }
 
-div.banner-title h1 {
-  font-size: 1.6em;
-  margin: 0;
+#title {
+    font-size:1.6em;
+    font-weight:bold;
+    text-align:left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -o-text-overflow:ellipsis;
+    margin:0px;
+    color:White;
 }
 
-div.banner-title h2 {
-  font-size: 0.8em;
-  font-weight: normal;
-  color: #C5D5D5;
-  margin: 0;
+#subtitle {
+    font-size:.8em;
+    overflow: hidden;
+    font-weight:normal;
+    color: #C5D5D5;
+    margin:0px;
 }
 
-div.banner-identity {
-  float: right;
-  padding-top: 5px;
-  padding-right: 15px;
+#logoArea{
+    float:right;
+    padding-top: 5px;
+    padding-right:15px;
 }
 
-div.banner div.org {
-  float: left;
-  text-align: right;
-  font-size: 0.75em;
+#organizationText {
+    float:left;
+    text-align:right;
+    font-size:.75em;
 }
 
-div.banner div.logo {
-  float: right;
-  padding-left: 10px;
+#logo{
+    height:35px;
+    border:none;
+    outline:none;
+    float:right;
+    padding-left: 10px;
 }
 
+/*
+ * Map area and components
+ */
 #map {
-  position:absolute;
-  top:47px;
-  border:none;
-  padding:0;
-  height:calc(100% - 47px);
-  width:100%;
-  overflow:hidden;
+    position:absolute;
+    top:45px;
+    border:none;
+    padding:0;
+    height:calc(100% - 45px);
+    width:100%;
+    overflow:hidden;
 }
-
-
-
 
 .leaflet-control-search ul.search-tooltip {
-  min-width: 170px;
+    min-width: 170px;
 }
 .search-tip.Locations b{
 	color: #fff;
@@ -84,8 +110,8 @@ div.banner div.logo {
 	clear: left;
 	float: right;
 	padding: 0 4px;
-  margin-left: 4px;
-  font-size: .8em;
+    margin-left: 4px;
+    font-size: .8em;
 }
 
 
@@ -113,22 +139,23 @@ border-radius: 30px;
 }
 
 .marker-cluster div {
-  width: 30px;
-  height: 30px;
-  margin-left: 10px;
-  margin-top: 10px;
-  text-align: center;
-  border-radius: 15px;
-  font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
-  color: #fff;
+width: 30px;
+height: 30px;
+margin-left: 10px;
+margin-top: 10px;
+
+text-align: center;
+border-radius: 15px;
+font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+color: #fff;
 }
 
 .marker-cluster-small div {
-  width: 20px;
-  height: 20px;
-  margin-left: 10px;
-  margin-top: 10px;
-  border-radius: 10px;
+width: 20px;
+height: 20px;
+margin-left: 10px;
+margin-top: 10px;
+border-radius: 10px;
 }
 .marker-cluster-large div {
 width: 40px;
@@ -147,22 +174,7 @@ line-height: 20px;
 line-height: 40px;
 }
 
-
-
-
-
-
 /* Popup */
-
-a {
-  font-weight: bold;
-}
-
-td.att_name { font-weight: bold;
-  text-align: right;}
-
-
-
 .map .leaflet-popup-content-wrapper {
      -moz-background-clip: padding;
   -webkit-background-clip: padding-box;
