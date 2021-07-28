@@ -83,19 +83,15 @@ export default class FacilityMap {
 
   configure () {
 
-		// Park Tiles 4
-		// Use either 256 or 512 (512 has text that is too small to read on MacBook)
-		// Use either @2x or ''; @2x is crisper on the MacBook
-		L.tileLayer('https://api.mapbox.com/styles/v1/nps/{style_id}/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoibnBzIiwiYSI6IkdfeS1OY1UifQ.K8Qn5ojTw4RV1GwBlsci-Q', {
-      attribution: "&copy; <a href='https://www.mapbox.com/about/maps/' target='_blank'>Mapbox</a> &copy; <a href='https://www.openstreetmap.org/copyright' target='_blank'>OpenStreetMap</a> contributors",
-			style_id: "cjt94v8pu23wh1fqug0cnviat",  //Park Tiles Standard
-			//style_id: "cjua0op0k4q301gpbb7o7wc6t",  //Park Tiles Light
-			//style_id: "cju8w7m1l50bu1frs10dajli6",  //Park Tiles Slate
-      maxZoom: 5
-		}).addTo(this.map)
+    // Park Tiles 4
+    L.tileLayer('https://atlas-stg.geoplatform.gov/styles/v1/atlas-user/ck58pyquo009v01p99xebegr9/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYXRsYXMtdXNlciIsImEiOiJjazFmdGx2bjQwMDAwMG5wZmYwbmJwbmE2In0.lWXK2UexpXuyVitesLdwUg', {
+      maxZoom: 14,
+      maxZoom: 19
+    }).addTo(this.map)
 
     // Esri World Imagery
-    L.esri.basemapLayer('ImageryClarity', {minZoom: 5, maxZoom: 19, opacity: 0.8}).addTo(this.map)
+    L.esri.basemapLayer('ImageryClarity', {minZoom: 5, maxZoom: 13, opacity: 0.8}).addTo(this.map)
+
 
     // AKR GIS Facilities Map Service
     L.esri.dynamicMapLayer({
