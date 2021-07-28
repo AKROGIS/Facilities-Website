@@ -85,12 +85,13 @@ export default class FacilityMap {
 
     // Park Tiles 4
     L.tileLayer('https://atlas-stg.geoplatform.gov/styles/v1/atlas-user/ck58pyquo009v01p99xebegr9/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYXRsYXMtdXNlciIsImEiOiJjazFmdGx2bjQwMDAwMG5wZmYwbmJwbmE2In0.lWXK2UexpXuyVitesLdwUg', {
-      maxZoom: 14,
+      minZoom: 19,
       maxZoom: 19
     }).addTo(this.map)
 
     // Esri World Imagery
-    L.esri.basemapLayer('ImageryClarity', {minZoom: 5, maxZoom: 13, opacity: 0.8}).addTo(this.map)
+    // See: https://esri.github.io/esri-leaflet/api-reference/layers/basemap-layer.html
+    L.esri.basemapLayer('ImageryFirefly', {minZoom: 5, maxZoom: 18, opacity: 0.8}).addTo(this.map)
 
 
     // AKR GIS Facilities Map Service
